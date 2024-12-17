@@ -6,7 +6,7 @@ local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local Holding = false
 
-_G.AimbotEnabled = true
+_G.AimbotEnabled = false -- Start with aimbot disabled
 _G.TeamCheck = false
 _G.AimPart = "Head"
 _G.Sensitivity = 0
@@ -16,7 +16,7 @@ _G.CircleColor = Color3.fromRGB(255, 255, 255)
 _G.CircleTransparency = 0.7
 _G.CircleRadius = 80
 _G.CircleFilled = false
-_G.CircleVisible = true
+_G.CircleVisible = false -- Start with FOV circle hidden
 _G.CircleThickness = 0
 
 local FOVCircle = Drawing.new("Circle")
@@ -45,7 +45,8 @@ ShowFovButton.Text = "Show FOV Circle"
 ShowFovButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 ShowFovButton.TextColor3 = Color3.fromRGB(0, 0, 0)
 ShowFovButton.MouseButton1Click:Connect(function()
-    _G.CircleVisible = not _G.CircleVisible
+    _G.CircleVisible = not _G.CircleVisible -- Toggle visibility of the FOV circle
+    FOVCircle.Visible = _G.CircleVisible
 end)
 
 local ToggleAimbotButton = Instance.new("TextButton", MenuFrame)
@@ -55,7 +56,7 @@ ToggleAimbotButton.Text = "Toggle Aimbot"
 ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 ToggleAimbotButton.TextColor3 = Color3.fromRGB(0, 0, 0)
 ToggleAimbotButton.MouseButton1Click:Connect(function()
-    _G.AimbotEnabled = not _G.AimbotEnabled
+    _G.AimbotEnabled = not _G.AimbotEnabled -- Toggle the aimbot functionality
 end)
 
 -- Aimbot and FOV circle logic
@@ -124,6 +125,9 @@ RunService.RenderStepped:Connect(function()
     FOVCircle.Thickness = _G.CircleThickness
 
     if Holding == true and _G.AimbotEnabled == true then
-        TweenService:Create(Camera, TweenInfo.new(_G.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = CFrame.new(Camera.CFrame.Position, GetClosestPlayer().Character[_G.AimPart].Position)}):Play()
+        local target = GetClosestPlayer()
+        if target and target.Character and target.Character:FindFirstChild(_G.AimPart) then
+            TweenService:Create(Camera, TweenInfo.new(_G.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = CFrame.new(Camera.CFrame.Position, target.Character[_G.AimPart].Position)}):Play()
+        end
     end
 end)
