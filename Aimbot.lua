@@ -2,9 +2,8 @@ local Camera = workspace.CurrentCamera
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
-local Holding = false
+local TweenService = game:GetService("TweenService")
 
 _G.AimbotEnabled = false -- Start with aimbot disabled
 _G.TeamCheck = false
@@ -33,14 +32,46 @@ FOVCircle.Thickness = _G.CircleThickness
 -- Create GUI elements
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
 local MenuFrame = Instance.new("Frame", ScreenGui)
-MenuFrame.Size = UDim2.new(0, 250, 0, 150)
+MenuFrame.Size = UDim2.new(0, 250, 0, 200)
 MenuFrame.Position = UDim2.new(0, 10, 0, 10)
-MenuFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-MenuFrame.BackgroundTransparency = 0.6
+MenuFrame.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+MenuFrame.BackgroundTransparency = 0.7
 MenuFrame.BorderSizePixel = 0
-MenuFrame.Draggable = true
 MenuFrame.Active = true
 MenuFrame.Selectable = true
+
+-- Make the frame draggable
+local dragging, dragInput, dragStart, startPos
+
+local function updateDrag(input)
+	local delta = input.Position - dragStart
+	MenuFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+MenuFrame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = MenuFrame.Position
+		input.Changed:Connect(function()
+			if dragging == false then
+				return
+			end
+		end)
+	end
+end)
+
+MenuFrame.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+
+RunService.Heartbeat:Connect(function()
+	if dragging then
+		updateDrag(UserInputService:GetMouseLocation())
+	end
+end)
 
 -- Create Title for the Menu
 local Title = Instance.new("TextLabel", MenuFrame)
@@ -55,10 +86,10 @@ Title.TextAlign = Enum.TextAlign.Center
 
 -- Create Show FOV Circle button
 local ShowFovButton = Instance.new("TextButton", MenuFrame)
-ShowFovButton.Size = UDim2.new(1, 0, 0.5, 0)
+ShowFovButton.Size = UDim2.new(1, 0, 0.4, 0)
 ShowFovButton.Position = UDim2.new(0, 0, 0.25, 0)
 ShowFovButton.Text = "Show FOV Circle"
-ShowFovButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+ShowFovButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 ShowFovButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ShowFovButton.TextSize = 14
 ShowFovButton.TextButtonMode = Enum.ButtonMode.Toggle
@@ -67,18 +98,18 @@ ShowFovButton.MouseButton1Click:Connect(function()
     FOVCircle.Visible = _G.CircleVisible
 end)
 ShowFovButton.MouseEnter:Connect(function()
-    ShowFovButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    ShowFovButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 end)
 ShowFovButton.MouseLeave:Connect(function()
-    ShowFovButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+    ShowFovButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 end)
 
 -- Create Toggle Aimbot button
 local ToggleAimbotButton = Instance.new("TextButton", MenuFrame)
-ToggleAimbotButton.Size = UDim2.new(1, 0, 0.5, 0)
-ToggleAimbotButton.Position = UDim2.new(0, 0, 0.75, 0)
+ToggleAimbotButton.Size = UDim2.new(1, 0, 0.4, 0)
+ToggleAimbotButton.Position = UDim2.new(0, 0, 0.65, 0)
 ToggleAimbotButton.Text = "Toggle Aimbot"
-ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 ToggleAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleAimbotButton.TextSize = 14
 ToggleAimbotButton.TextButtonMode = Enum.ButtonMode.Toggle
@@ -86,10 +117,10 @@ ToggleAimbotButton.MouseButton1Click:Connect(function()
     _G.AimbotEnabled = not _G.AimbotEnabled -- Toggle the aimbot functionality
 end)
 ToggleAimbotButton.MouseEnter:Connect(function()
-    ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 end)
 ToggleAimbotButton.MouseLeave:Connect(function()
-    ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+    ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 end)
 
 -- Aimbot and FOV circle logic
