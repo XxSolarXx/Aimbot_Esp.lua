@@ -33,7 +33,7 @@ FOVCircle.Thickness = _G.CircleThickness
 -- Create GUI elements
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
 local MenuFrame = Instance.new("Frame", ScreenGui)
-MenuFrame.Size = UDim2.new(0, 200, 0, 100)
+MenuFrame.Size = UDim2.new(0, 200, 0, 150)
 MenuFrame.Position = UDim2.new(0, 10, 0, 10)
 MenuFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 MenuFrame.BackgroundTransparency = 0.5
