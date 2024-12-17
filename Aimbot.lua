@@ -33,30 +33,63 @@ FOVCircle.Thickness = _G.CircleThickness
 -- Create GUI elements
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
 local MenuFrame = Instance.new("Frame", ScreenGui)
-MenuFrame.Size = UDim2.new(0, 200, 0, 150)
+MenuFrame.Size = UDim2.new(0, 250, 0, 150)
 MenuFrame.Position = UDim2.new(0, 10, 0, 10)
-MenuFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-MenuFrame.BackgroundTransparency = 0.5
+MenuFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MenuFrame.BackgroundTransparency = 0.6
+MenuFrame.BorderSizePixel = 0
+MenuFrame.Draggable = true
+MenuFrame.Active = true
+MenuFrame.Selectable = true
 
+-- Create Title for the Menu
+local Title = Instance.new("TextLabel", MenuFrame)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Position = UDim2.new(0, 0, 0, 0)
+Title.Text = "Aimbot & FOV Settings"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Title.BackgroundTransparency = 0.5
+Title.TextSize = 18
+Title.TextAlign = Enum.TextAlign.Center
+
+-- Create Show FOV Circle button
 local ShowFovButton = Instance.new("TextButton", MenuFrame)
 ShowFovButton.Size = UDim2.new(1, 0, 0.5, 0)
-ShowFovButton.Position = UDim2.new(0, 0, 0, 0)
+ShowFovButton.Position = UDim2.new(0, 0, 0.25, 0)
 ShowFovButton.Text = "Show FOV Circle"
-ShowFovButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ShowFovButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ShowFovButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+ShowFovButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ShowFovButton.TextSize = 14
+ShowFovButton.TextButtonMode = Enum.ButtonMode.Toggle
 ShowFovButton.MouseButton1Click:Connect(function()
     _G.CircleVisible = not _G.CircleVisible -- Toggle visibility of the FOV circle
     FOVCircle.Visible = _G.CircleVisible
 end)
+ShowFovButton.MouseEnter:Connect(function()
+    ShowFovButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+end)
+ShowFovButton.MouseLeave:Connect(function()
+    ShowFovButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+end)
 
+-- Create Toggle Aimbot button
 local ToggleAimbotButton = Instance.new("TextButton", MenuFrame)
 ToggleAimbotButton.Size = UDim2.new(1, 0, 0.5, 0)
-ToggleAimbotButton.Position = UDim2.new(0, 0, 0.5, 0)
+ToggleAimbotButton.Position = UDim2.new(0, 0, 0.75, 0)
 ToggleAimbotButton.Text = "Toggle Aimbot"
-ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ToggleAimbotButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+ToggleAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleAimbotButton.TextSize = 14
+ToggleAimbotButton.TextButtonMode = Enum.ButtonMode.Toggle
 ToggleAimbotButton.MouseButton1Click:Connect(function()
     _G.AimbotEnabled = not _G.AimbotEnabled -- Toggle the aimbot functionality
+end)
+ToggleAimbotButton.MouseEnter:Connect(function()
+    ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+end)
+ToggleAimbotButton.MouseLeave:Connect(function()
+    ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
 end)
 
 -- Aimbot and FOV circle logic
