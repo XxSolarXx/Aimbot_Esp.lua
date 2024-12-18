@@ -9,7 +9,7 @@ local Settings = {
     ESPEnabled = false,
     AimbotEnabled = false,
     FOVRadius = 100,  -- Smaller FOV circle radius
-    FOVCircleVisible = true  -- Start with FOV Circle visible
+    FOVCircleVisible = true,  -- Start with FOV Circle visible
 }
 
 -- ESP
@@ -75,25 +75,6 @@ RunService.RenderStepped:Connect(function()
     FOVCircle.Visible = Settings.FOVCircleVisible  -- Toggle visibility based on the setting
 end)
 
--- Aimbot Logic (Visibility Check)
-local function IsPlayerVisible(player)
-    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        local playerRootPart = player.Character.HumanoidRootPart
-        local camera = workspace.CurrentCamera
-        local _, onScreen = camera:WorldToViewportPoint(playerRootPart.Position)
-        if onScreen then
-            -- Raycast from camera to player's root part to check visibility
-            local ray = Ray.new(camera.CFrame.Position, playerRootPart.Position - camera.CFrame.Position)
-            local hit, position = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
-            -- Check if the ray hit something other than the player's character
-            if not hit or hit.Parent == player.Character then
-                return true  -- Player is visible
-            end
-        end
-    end
-    return false  -- Player is not visible
-end
-
 -- Aimbot when right mouse button is pressed
 local aimbotMessage = nil  -- Message display object
 
@@ -138,7 +119,7 @@ end)
 RunService.RenderStepped:Connect(function()
     if Settings.AimbotEnabled then
         local target = GetClosestPlayerToCursor()
-        if target and IsPlayerVisible(target) and target.Character and target.Character:FindFirstChild("Head") then
+        if target and target.Character and target.Character:FindFirstChild("Head") then
             -- Lock onto the player's head instead of their root part
             local targetHead = target.Character.Head
             Mouse.TargetFilter = target.Character
@@ -221,3 +202,7 @@ ToggleFOVButton.MouseButton1Click:Connect(function()
     Settings.FOVCircleVisible = not Settings.FOVCircleVisible
     ToggleFOVButton.Text = Settings.FOVCircleVisible and "FOV: ON" or "FOV: OFF"
 end)
+
+-- Fix to prevent the GUI from disappearing unexpectedly
+ScreenGui.Parent = LocalPlayer.PlayerGui
+ScreenGui.Enabled = true  -- Ensure the GUI is always enabled unless manually disabled
