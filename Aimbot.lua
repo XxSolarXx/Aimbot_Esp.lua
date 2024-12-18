@@ -43,15 +43,28 @@ local function UpdateESP()
     end
 end
 
--- Aimbot (Now targeting the Head instead of HumanoidRootPart)
+-- Aimbot (Targeting Head with Wall Check)
 local function GetClosestPlayerToCursor()
     local closestPlayer, shortestDistance = nil, Settings.FOVRadius
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then  -- Changed to "Head"
-            local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(player.Character.Head.Position)  -- Changed to "Head"
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            local character = player.Character
+            local head = character.Head
+            local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(head.Position)
+
             if onScreen then
                 local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
                 if distance < shortestDistance then
+                    -- Perform a wall check using raycasting
+                    local rayOrigin = workspace.CurrentCamera.CFrame.Position
+                    local rayDirection = (head.Position - rayOrigin).Unit * (rayOrigin - head.Position).Magnitude
+                    local ray = workspace:Raycast(rayOrigin, rayDirection)
+                    
+                    if ray and ray.Instance and ray.Instance.Parent ~= character then
+                        -- If ray hits an object that isn't the target's character, we don't aim at them
+                        continue
+                    end
+
                     closestPlayer = player
                     shortestDistance = distance
                 end
@@ -61,29 +74,38 @@ local function GetClosestPlayerToCursor()
     return closestPlayer
 end
 
+-- Aimbot Logic (Targeting Head now with wall check)
+RunService.RenderStepped:Connect(function()
+    if Settings.AimbotEnabled then
+        local target = GetClosestPlayerToCursor()
+        if target and target.Character and target.Character:FindFirstChild("Head") then
+            local head = target.Character.Head
+            -- Perform a raycast from the camera to the head
+            local rayOrigin = workspace.CurrentCamera.CFrame.Position
+            local rayDirection = (head.Position - rayOrigin).Unit * (rayOrigin - head.Position).Magnitude
+            local ray = workspace:Raycast(rayOrigin, rayDirection)
+            
+            -- Check if ray hit anything
+            if not ray or (ray.Instance and ray.Instance.Parent == target.Character) then
+                -- If the ray does not hit anything or hits the target, aim at the target
+                workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, head.Position)
+            end
+        end
+    end
+end)
+
 -- FOV Circle (Hollow White Ring)
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 1  -- Thin white circle
 FOVCircle.Radius = Settings.FOVRadius
 FOVCircle.Color = Color3.fromRGB(255, 255, 255)  -- White color
 FOVCircle.Visible = Settings.FOVCircleVisible
+FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
 FOVCircle.Filled = false  -- Set this to false to make the circle hollow
 
 RunService.RenderStepped:Connect(function()
-    -- Update the FOV circle's position to match the mouse's position
     FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
     FOVCircle.Visible = Settings.FOVCircleVisible
-end)
-
--- Aimbot Logic (Targeting Head now)
-RunService.RenderStepped:Connect(function()
-    if Settings.AimbotEnabled then
-        local target = GetClosestPlayerToCursor()
-        if target and target.Character and target.Character:FindFirstChild("Head") then  -- Changed to "Head"
-            Mouse.TargetFilter = target.Character
-            workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Character.Head.Position)  -- Changed to "Head"
-        end
-    end
 end)
 
 -- GUI
