@@ -1,7 +1,3 @@
-in this code make the gui moveable.
-
--- Roblox Aimbot, ESP, FOV, and Settings (Full Expanded Version)
-
 local Players = game:GetService("Players")
 local Camera = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
@@ -15,7 +11,7 @@ local WallCheckEnabled = true
 local FOVSize = 100
 local FOVColor = Color3.fromRGB(0, 255, 0)
 local ESPBoxColor = Color3.fromRGB(255, 0, 0)
-local AimbotTarget = "Head" -- Default aimbot target
+local AimbotTarget = "Head"
 local FOVCircle = nil
 local ESPDrawings = {}
 
@@ -26,6 +22,8 @@ MenuFrame.Size = UDim2.new(0, 250, 0, 400)
 MenuFrame.Position = UDim2.new(1, -270, 0, 50)
 MenuFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MenuFrame.BackgroundTransparency = 0.8
+MenuFrame.Active = true
+MenuFrame.Draggable = true  -- Make the frame draggable
 
 -- Show FOV Button
 local ShowFovButton = Instance.new("TextButton", MenuFrame)
