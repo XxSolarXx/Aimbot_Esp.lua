@@ -75,20 +75,23 @@ RunService.RenderStepped:Connect(function()
     FOVCircle.Visible = Settings.FOVCircleVisible
 end)
 
--- Aimbot Logic
+-- Aimbot Logic (Visibility Check)
 local function IsPlayerVisible(player)
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local playerRootPart = player.Character.HumanoidRootPart
         local camera = workspace.CurrentCamera
         local _, onScreen = camera:WorldToViewportPoint(playerRootPart.Position)
         if onScreen then
-            -- Check if the player's root part is not obstructed by walls
+            -- Raycast from camera to player's root part to check visibility
             local ray = Ray.new(camera.CFrame.Position, playerRootPart.Position - camera.CFrame.Position)
             local hit, position = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
-            return not hit  -- Return true if no obstruction is detected
+            -- Check if the ray hit something other than the player's character
+            if not hit or hit.Parent == player.Character then
+                return true  -- Player is visible
+            end
         end
     end
-    return false
+    return false  -- Player is not visible
 end
 
 RunService.RenderStepped:Connect(function()
