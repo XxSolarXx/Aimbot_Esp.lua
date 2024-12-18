@@ -9,6 +9,10 @@ _G.ESPEnabled = false
 _G.ESPBoxColor = Color3.fromRGB(255, 0, 0)
 _G.ESPBoxThickness = 2
 
+-- Aimbot Settings
+_G.AimbotEnabled = false
+_G.AimbotFOV = 50  -- Adjust the FOV radius for aimbot targeting
+
 -- Create GUI elements
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
 local MenuFrame = Instance.new("Frame", ScreenGui)
@@ -39,6 +43,11 @@ ToggleAimbotButton.BackgroundTransparency = 0.8
 ToggleAimbotButton.TextColor3 = Color3.fromRGB(0, 0, 0)
 ToggleAimbotButton.MouseButton1Click:Connect(function()
     _G.AimbotEnabled = not _G.AimbotEnabled
+    if _G.AimbotEnabled then
+        ToggleAimbotButton.Text = "Aimbot ON"
+    else
+        ToggleAimbotButton.Text = "Aimbot OFF"
+    end
 end)
 
 -- Toggle ESP Button
@@ -96,6 +105,44 @@ local function DrawESPBox(player)
         end
     end
 end
+
+-- Aimbot Functionality
+local function Aimbot()
+    while _G.AimbotEnabled do
+        local closestPlayer = nil
+        local shortestDistance = _G.AimbotFOV
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local rootPart = player.Character.HumanoidRootPart
+                local screenPos, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
+
+                if onScreen then
+                    local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)).Magnitude
+                    if distance < shortestDistance then
+                        closestPlayer = player
+                        shortestDistance = distance
+                    end
+                end
+            end
+        end
+
+        if closestPlayer then
+            local targetPos = closestPlayer.Character.HumanoidRootPart.Position
+            local cameraPos = Camera.CFrame.Position
+            local direction = (targetPos - cameraPos).unit
+            Camera.CFrame = CFrame.new(cameraPos, targetPos)
+        end
+
+        wait(0.05) -- Update every frame for smooth aimbot
+    end
+end
+
+-- Run the Aimbot when it's enabled
+RunService.Heartbeat:Connect(function()
+    if _G.AimbotEnabled then
+        Aimbot()
+    end
+end)
 
 -- Update ESP every frame
 RunService.RenderStepped:Connect(function()
