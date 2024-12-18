@@ -13,6 +13,9 @@ _G.FOVColor = Color3.fromRGB(0, 255, 0)
 _G.FOVSize = 50  -- Default FOV size
 _G.AimbotTarget = "Head"  -- Default target for aimbot
 
+-- Wall Check Settings
+_G.EnableWallCheck = true  -- Enable or disable the wall check feature
+
 -- Create GUI elements
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
 local MenuFrame = Instance.new("Frame", ScreenGui)
@@ -127,7 +130,7 @@ SettingsButton.MouseButton1Click:Connect(function()
     SettingsGui.Visible = not SettingsGui.Visible
 end)
 
--- Aimbot Functionality
+-- Aimbot Functionality with Wall Check
 local function Aimbot()
     while _G.AimbotEnabled do
         local closestPlayer = nil
@@ -143,9 +146,14 @@ local function Aimbot()
                     if onScreen then
                         local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)).Magnitude
                         if distance < closestDistance then
-                            closestPlayer = player
-                            closestDistance = distance
-                            targetPos = bodyPart.Position
+                            -- Wall Check: Check if there's an obstruction between the camera and the target
+                            local ray = Ray.new(Camera.CFrame.Position, (bodyPart.Position - Camera.CFrame.Position).unit * (bodyPart.Position - Camera.CFrame.Position).Magnitude)
+                            local hitPart = workspace:FindPartOnRay(ray, LocalPlayer.Character)
+                            if not hitPart or hitPart:IsDescendantOf(player.Character) then
+                                closestPlayer = player
+                                closestDistance = distance
+                                targetPos = bodyPart.Position
+                            end
                         end
                     end
                 end
@@ -181,39 +189,26 @@ local function HighlightHumanoid(player)
             -- Check if the humanoid already has a highlight
             local existingHighlight = player.Character:FindFirstChild("HumanoidHighlight")
             if not existingHighlight then
-                -- Create a new highlight if it doesn't exist
+                -- Apply the highlight effect
                 local highlight = Instance.new("Highlight")
                 highlight.Name = "HumanoidHighlight"
                 highlight.Parent = player.Character
-                highlight.FillColor = _G.ESPBoxColor -- Customize the highlight color
-                highlight.FillTransparency = 0.5 -- Set transparency
-                highlight.OutlineTransparency = 0
+                highlight.Adornee = player.Character
+                highlight.FillColor = _G.ESPBoxColor
+                highlight.OutlineColor = _G.ESPBoxColor
+                highlight.FillTransparency = 0.5
+                highlight.OutlineTransparency = 0.5
             end
         end
     end
 end
 
--- Loop for ESP
-RunService.RenderStepped:Connect(function()
+-- Update ESP and aimbot features continuously
+RunService.Heartbeat:Connect(function()
+    -- Update ESP (show/hide ESP boxes)
     if _G.ESPEnabled then
         for _, player in pairs(Players:GetPlayers()) do
             HighlightHumanoid(player)
         end
-    end
-end)
-
--- Draw FOV Circle and Keep It Circular
-RunService.RenderStepped:Connect(function()
-    if _G.CircleVisible then
-        local mousePos = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
-        local fovCircle = Instance.new("Frame")
-        fovCircle.Size = UDim2.new(0, _G.FOVSize * 2, 0, _G.FOVSize * 2)
-        fovCircle.Position = UDim2.new(0, mousePos.X - _G.FOVSize, 0, mousePos.Y - _G.FOVSize)
-        fovCircle.BackgroundColor3 = _G.FOVColor
-        fovCircle.BackgroundTransparency = 0.5
-        fovCircle.BorderSizePixel = 0
-        fovCircle.Parent = ScreenGui
-        wait(0.1)
-        fovCircle:Destroy() -- Remove the circle after each update
     end
 end)
