@@ -12,18 +12,19 @@ _G.ESPBoxColor = Color3.fromRGB(255, 0, 0)
 _G.FOVColor = Color3.fromRGB(0, 255, 0)
 _G.FOVSize = 50  -- Default FOV size
 _G.AimbotTarget = "Head"  -- Default target for aimbot
+_G.SpinToggle = false  -- Default spin toggle status
 
 -- Create GUI elements
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
 local MenuFrame = Instance.new("Frame", ScreenGui)
-MenuFrame.Size = UDim2.new(0, 200, 0, 150)
-MenuFrame.Position = UDim2.new(1, -210, 1, -190)
+MenuFrame.Size = UDim2.new(0, 200, 0, 200)
+MenuFrame.Position = UDim2.new(1, -210, 1, -200)
 MenuFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 MenuFrame.BackgroundTransparency = 0.8
 
 -- Show Fov Button
 local ShowFovButton = Instance.new("TextButton", MenuFrame)
-ShowFovButton.Size = UDim2.new(1, 0, 0.3, 0)
+ShowFovButton.Size = UDim2.new(1, 0, 0.2, 0)
 ShowFovButton.Position = UDim2.new(0, 0, 0, 0)
 ShowFovButton.Text = "Show FOV Circle"
 ShowFovButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -35,8 +36,8 @@ end)
 
 -- Toggle Aimbot Button
 local ToggleAimbotButton = Instance.new("TextButton", MenuFrame)
-ToggleAimbotButton.Size = UDim2.new(1, 0, 0.3, 0)
-ToggleAimbotButton.Position = UDim2.new(0, 0, 0.3, 0)
+ToggleAimbotButton.Size = UDim2.new(1, 0, 0.2, 0)
+ToggleAimbotButton.Position = UDim2.new(0, 0, 0.2, 0)
 ToggleAimbotButton.Text = "Toggle Aimbot"
 ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 ToggleAimbotButton.BackgroundTransparency = 0.8
@@ -52,8 +53,8 @@ end)
 
 -- Toggle ESP Button
 local ToggleESPButton = Instance.new("TextButton", MenuFrame)
-ToggleESPButton.Size = UDim2.new(1, 0, 0.3, 0)
-ToggleESPButton.Position = UDim2.new(0, 0, 0.6, 0)
+ToggleESPButton.Size = UDim2.new(1, 0, 0.2, 0)
+ToggleESPButton.Position = UDim2.new(0, 0, 0.4, 0)
 ToggleESPButton.Text = "Toggle ESP"
 ToggleESPButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 ToggleESPButton.BackgroundTransparency = 0.8
@@ -62,10 +63,27 @@ ToggleESPButton.MouseButton1Click:Connect(function()
     _G.ESPEnabled = not _G.ESPEnabled
 end)
 
+-- Toggle Spin Button
+local ToggleSpinButton = Instance.new("TextButton", MenuFrame)
+ToggleSpinButton.Size = UDim2.new(1, 0, 0.2, 0)
+ToggleSpinButton.Position = UDim2.new(0, 0, 0.6, 0)
+ToggleSpinButton.Text = "Toggle Spin"
+ToggleSpinButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ToggleSpinButton.BackgroundTransparency = 0.8
+ToggleSpinButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ToggleSpinButton.MouseButton1Click:Connect(function()
+    _G.SpinToggle = not _G.SpinToggle
+    if _G.SpinToggle then
+        ToggleSpinButton.Text = "Spin ON"
+    else
+        ToggleSpinButton.Text = "Spin OFF"
+    end
+end)
+
 -- Settings Button to open the Settings GUI
 local SettingsButton = Instance.new("TextButton", MenuFrame)
-SettingsButton.Size = UDim2.new(1, 0, 0.3, 0)
-SettingsButton.Position = UDim2.new(0, 0, 0.9, 0)
+SettingsButton.Size = UDim2.new(1, 0, 0.2, 0)
+SettingsButton.Position = UDim2.new(0, 0, 0.8, 0)
 SettingsButton.Text = "Settings"
 SettingsButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SettingsButton.BackgroundTransparency = 0.8
@@ -156,7 +174,7 @@ local function Aimbot()
         if closestPlayer and targetPos then
             local cameraPos = Camera.CFrame.Position
             local direction = (targetPos - cameraPos).unit
-            local lockStrength = 0.3  -- Increased to make the aimbot stronger
+            local lockStrength = 0.3  -- Increased value for stronger aimbot
             local adjustedDirection = direction * lockStrength + (Camera.CFrame.LookVector * (1 - lockStrength))  -- Apply correction
             Camera.CFrame = CFrame.new(cameraPos, cameraPos + adjustedDirection)
         end
@@ -176,44 +194,22 @@ end)
 local function HighlightHumanoid(player)
     -- Ensure player has a character and humanoid
     if player.Character and player.Character:FindFirstChild("Humanoid") then
-        local humanoid = player.Character.Humanoid
-
-        -- Ensure the humanoid exists before applying highlight
-        if humanoid then
-            -- Check if the humanoid already has a highlight
-            local existingHighlight = player.Character:FindFirstChild("HumanoidHighlight")
-            if not existingHighlight then
-                -- Create a new highlight if it doesn't exist
-                local highlight = Instance.new("Highlight")
-                highlight.Name = "HumanoidHighlight"
-                highlight.Parent = player.Character
-                highlight.FillColor = _G.ESPBoxColor -- Customize the highlight color
-                highlight.FillTransparency = 0.5 -- Set transparency
-                highlight.OutlineTransparency = 0
-            end
+        local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            local box = Instance.new("Frame")
+            box.Size = UDim2.new(0, 50, 0, 50)
+            box.Position = UDim2.new(0, humanoidRootPart.Position.X, 0, humanoidRootPart.Position.Y)
+            box.BackgroundColor3 = _G.ESPBoxColor
+            box.BorderSizePixel = 0
+            box.Visible = _G.ESPEnabled
+            box.Parent = ScreenGui
         end
     end
 end
 
--- Loop for ESP
-RunService.RenderStepped:Connect(function()
-    if _G.ESPEnabled then
-        for _, player in pairs(Players:GetPlayers()) do
-            HighlightHumanoid(player)
-        end
-    end
-end)
-
--- Draw FOV Circle and Keep It Circular
-RunService.RenderStepped:Connect(function()
-    if _G.CircleVisible then
-        local mousePos = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
-        local circle = Drawing.new("Circle")
-        circle.Radius = _G.FOVSize
-        circle.Position = mousePos
-        circle.Color = _G.FOVColor
-        circle.Thickness = 2
-        circle.Filled = true
-        circle.Transparency = 1
-    end
+-- Show ESP for each player
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        HighlightHumanoid(player)
+    end)
 end)
