@@ -9,10 +9,10 @@ local Settings = {
     ESPEnabled = false,
     AimbotEnabled = false,
     FOVRadius = 100,
-    FOVCircleVisible = true,
-    ShowNameTags = true,
-    ShowHealthBars = true,
-    ShowDistance = true,
+    FOVCircleVisible = false,
+    ShowNameTags = false,
+    ShowHealthBars = false,
+    ShowDistance = false,
     ESPColor = Color3.fromRGB(0, 255, 0),
     AimbotSmoothness = 0.01,  -- A value between 0 (instant) to 1 (very smooth)
 }
