@@ -37,6 +37,8 @@ MenuFrame.Size = UDim2.new(0, 200, 0, 150)
 MenuFrame.Position = UDim2.new(0, 10, 0, 10)
 MenuFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 MenuFrame.BackgroundTransparency = 0.5
+MenuFrame.Draggable = true -- Make the GUI draggable
+MenuFrame.Active = true -- Allow interaction with the GUI
 
 local ShowFovButton = Instance.new("TextButton", MenuFrame)
 ShowFovButton.Size = UDim2.new(1, 0, 0.5, 0)
