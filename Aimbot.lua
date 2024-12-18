@@ -1,155 +1,163 @@
-local Camera = workspace.CurrentCamera
+-- Roblox Aimbot, ESP, FOV, and Settings (Full Expanded Version)
+
 local Players = game:GetService("Players")
+local Camera = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+local ESPEnabled = false
+local AimbotEnabled = false
+local CircleVisible = false
+local WallCheckEnabled = true
+local FOVSize = 100
+local FOVColor = Color3.fromRGB(0, 255, 0)
+local ESPBoxColor = Color3.fromRGB(255, 0, 0)
+local AimbotTarget = "Head" -- Default aimbot target
+local FOVCircle = nil
+local ESPDrawings = {}
 
--- ESP and Aimbot Settings
-_G.ESPEnabled = false
-_G.AimbotEnabled = false
-_G.CircleVisible = false
-_G.ESPBoxColor = Color3.fromRGB(255, 0, 0)
-_G.FOVColor = Color3.fromRGB(0, 255, 0)
-_G.FOVSize = 50  -- Default FOV size
-_G.AimbotTarget = "Head"  -- Default target for aimbot
-
--- Wall Check Settings
-_G.EnableWallCheck = true  -- Enable or disable the wall check feature
-
--- Create GUI elements
+-- Settings for GUI
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
 local MenuFrame = Instance.new("Frame", ScreenGui)
-MenuFrame.Size = UDim2.new(0, 200, 0, 150)
-MenuFrame.Position = UDim2.new(1, -210, 1, -160)
-MenuFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+MenuFrame.Size = UDim2.new(0, 250, 0, 400)
+MenuFrame.Position = UDim2.new(1, -270, 0, 50)
+MenuFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MenuFrame.BackgroundTransparency = 0.8
 
--- Show Fov Button
+-- Show FOV Button
 local ShowFovButton = Instance.new("TextButton", MenuFrame)
-ShowFovButton.Size = UDim2.new(1, 0, 0.3, 0)
+ShowFovButton.Size = UDim2.new(1, 0, 0.2, 0)
 ShowFovButton.Position = UDim2.new(0, 0, 0, 0)
-ShowFovButton.Text = "Show FOV Circle"
-ShowFovButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ShowFovButton.BackgroundTransparency = 0.8
-ShowFovButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ShowFovButton.Text = "Toggle FOV Circle"
+ShowFovButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+ShowFovButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ShowFovButton.MouseButton1Click:Connect(function()
-    _G.CircleVisible = not _G.CircleVisible
+    CircleVisible = not CircleVisible
 end)
 
 -- Toggle Aimbot Button
 local ToggleAimbotButton = Instance.new("TextButton", MenuFrame)
-ToggleAimbotButton.Size = UDim2.new(1, 0, 0.3, 0)
-ToggleAimbotButton.Position = UDim2.new(0, 0, 0.3, 0)
+ToggleAimbotButton.Size = UDim2.new(1, 0, 0.2, 0)
+ToggleAimbotButton.Position = UDim2.new(0, 0, 0.2, 0)
 ToggleAimbotButton.Text = "Toggle Aimbot"
-ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ToggleAimbotButton.BackgroundTransparency = 0.8
-ToggleAimbotButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+ToggleAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleAimbotButton.MouseButton1Click:Connect(function()
-    _G.AimbotEnabled = not _G.AimbotEnabled
-    if _G.AimbotEnabled then
-        ToggleAimbotButton.Text = "Aimbot ON"
+    AimbotEnabled = not AimbotEnabled
+    if AimbotEnabled then
+        ToggleAimbotButton.Text = "Aimbot Enabled"
     else
-        ToggleAimbotButton.Text = "Aimbot OFF"
+        ToggleAimbotButton.Text = "Aimbot Disabled"
     end
 end)
 
 -- Toggle ESP Button
 local ToggleESPButton = Instance.new("TextButton", MenuFrame)
-ToggleESPButton.Size = UDim2.new(1, 0, 0.3, 0)
-ToggleESPButton.Position = UDim2.new(0, 0, 0.6, 0)
+ToggleESPButton.Size = UDim2.new(1, 0, 0.2, 0)
+ToggleESPButton.Position = UDim2.new(0, 0, 0.4, 0)
 ToggleESPButton.Text = "Toggle ESP"
-ToggleESPButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ToggleESPButton.BackgroundTransparency = 0.8
-ToggleESPButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ToggleESPButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+ToggleESPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleESPButton.MouseButton1Click:Connect(function()
-    _G.ESPEnabled = not _G.ESPEnabled
+    ESPEnabled = not ESPEnabled
+    if ESPEnabled then
+        ToggleESPButton.Text = "ESP Enabled"
+    else
+        ToggleESPButton.Text = "ESP Disabled"
+    end
 end)
 
--- Settings Button to open the Settings GUI
-local SettingsButton = Instance.new("TextButton", MenuFrame)
-SettingsButton.Size = UDim2.new(1, 0, 0.3, 0)
-SettingsButton.Position = UDim2.new(0, 0, 0.9, 0)
-SettingsButton.Text = "Settings"
-SettingsButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-SettingsButton.BackgroundTransparency = 0.8
-SettingsButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-
--- Create Settings GUI
-local SettingsGui = Instance.new("Frame", ScreenGui)
-SettingsGui.Size = UDim2.new(0, 250, 0, 300)
-SettingsGui.Position = UDim2.new(0, 0, 0, 0)
-SettingsGui.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-SettingsGui.BackgroundTransparency = 0.8
-SettingsGui.Visible = false
-
-local ESPColorButton = Instance.new("TextButton", SettingsGui)
-ESPColorButton.Size = UDim2.new(1, 0, 0.2, 0)
-ESPColorButton.Position = UDim2.new(0, 0, 0, 0)
-ESPColorButton.Text = "Change ESP Color"
-ESPColorButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ESPColorButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-ESPColorButton.MouseButton1Click:Connect(function()
-    local colorPicker = game:GetService("ReplicatedStorage"):WaitForChild("ColorPicker") -- Placeholder for color picker
-    _G.ESPBoxColor = colorPicker:GetColor() -- Get color from picker (you would need to implement a color picker)
+-- Settings for FOV Size and Color
+local FOVSizeSlider = Instance.new("TextButton", MenuFrame)
+FOVSizeSlider.Size = UDim2.new(1, 0, 0.2, 0)
+FOVSizeSlider.Position = UDim2.new(0, 0, 0.6, 0)
+FOVSizeSlider.Text = "Increase FOV"
+FOVSizeSlider.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+FOVSizeSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
+FOVSizeSlider.MouseButton1Click:Connect(function()
+    FOVSize = FOVSize + 10
+    if FOVCircle then
+        FOVCircle.Radius = FOVSize
+    end
 end)
 
-local FOVSizeButton = Instance.new("TextButton", SettingsGui)
-FOVSizeButton.Size = UDim2.new(1, 0, 0.2, 0)
-FOVSizeButton.Position = UDim2.new(0, 0, 0.2, 0)
-FOVSizeButton.Text = "Change FOV Size"
-FOVSizeButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-FOVSizeButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-FOVSizeButton.MouseButton1Click:Connect(function()
-    local newSize = math.random(30, 100)  -- Just a placeholder for testing
-    _G.FOVSize = newSize
-end)
+-- Create FOV Circle for Aimbot
+local function CreateFOVCircle()
+    FOVCircle = Drawing.new("Circle")
+    FOVCircle.Visible = false
+    FOVCircle.Radius = FOVSize
+    FOVCircle.Color = FOVColor
+    FOVCircle.Thickness = 2
+    FOVCircle.Filled = false
+end
 
-local FOVColorButton = Instance.new("TextButton", SettingsGui)
-FOVColorButton.Size = UDim2.new(1, 0, 0.2, 0)
-FOVColorButton.Position = UDim2.new(0, 0, 0.4, 0)
-FOVColorButton.Text = "Change FOV Color"
-FOVColorButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-FOVColorButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-FOVColorButton.MouseButton1Click:Connect(function()
-    local colorPicker = game:GetService("ReplicatedStorage"):WaitForChild("ColorPicker") -- Placeholder for color picker
-    _G.FOVColor = colorPicker:GetColor() -- Get color from picker (you would need to implement a color picker)
-end)
+-- Create ESP box and highlight players
+local function CreateESP(player)
+    if not player.Character or not player.Character:FindFirstChild("Humanoid") then return end
+    local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then return end
 
-local AimbotTargetButton = Instance.new("TextButton", SettingsGui)
-AimbotTargetButton.Size = UDim2.new(1, 0, 0.2, 0)
-AimbotTargetButton.Position = UDim2.new(0, 0, 0.6, 0)
-AimbotTargetButton.Text = "Change Aimbot Target"
-AimbotTargetButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-AimbotTargetButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-AimbotTargetButton.MouseButton1Click:Connect(function()
-    _G.AimbotTarget = _G.AimbotTarget == "Head" and "Torso" or "Head"  -- Toggle between Head and Torso
-end)
+    -- Create the ESP box
+    local box = Drawing.new("Square")
+    box.Visible = false
+    box.Color = ESPBoxColor
+    box.Thickness = 2
+    box.Filled = false
+    ESPDrawings[player] = box
+end
 
--- Toggle settings window
-SettingsButton.MouseButton1Click:Connect(function()
-    SettingsGui.Visible = not SettingsGui.Visible
-end)
+-- Update ESP boxes based on player position
+local function UpdateESP()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player == LocalPlayer then continue end
+        local box = ESPDrawings[player]
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local humanoidRootPart = player.Character.HumanoidRootPart
+            local screenPos, onScreen = Camera:WorldToViewportPoint(humanoidRootPart.Position)
+            if onScreen then
+                box.Visible = true
+                local size = (Camera:WorldToViewportPoint(humanoidRootPart.Position + Vector3.new(0, 5, 0))).Y - screenPos.Y
+                box.Size = Vector2.new(50, size)
+                box.Position = Vector2.new(screenPos.X - box.Size.X / 2, screenPos.Y - box.Size.Y / 2)
+            else
+                box.Visible = false
+            end
+        else
+            box.Visible = false
+        end
+    end
+end
 
--- Aimbot Functionality with Wall Check
+-- Wall Check for Aimbot
+local function WallCheck(targetPos)
+    if WallCheckEnabled then
+        local ray = Ray.new(Camera.CFrame.Position, (targetPos - Camera.CFrame.Position).unit * (targetPos - Camera.CFrame.Position).Magnitude)
+        local hitPart = workspace:FindPartOnRay(ray, LocalPlayer.Character)
+        if hitPart and not hitPart:IsDescendantOf(LocalPlayer.Character) then
+            return false
+        end
+    end
+    return true
+end
+
+-- Aimbot Logic
 local function Aimbot()
-    while _G.AimbotEnabled do
+    while AimbotEnabled do
         local closestPlayer = nil
-        local closestDistance = _G.FOVSize
+        local closestDistance = FOVSize
         local targetPos = nil
 
-        -- Check for all players in the game
+        -- Find the closest player within FOV
         for _, player in pairs(Players:GetPlayers()) do
             if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") then
-                local bodyPart = player.Character:FindFirstChild(_G.AimbotTarget)
+                local bodyPart = player.Character:FindFirstChild(AimbotTarget)
                 if bodyPart then
                     local screenPos, onScreen = Camera:WorldToViewportPoint(bodyPart.Position)
                     if onScreen then
-                        local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)).Magnitude
+                        local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
                         if distance < closestDistance then
-                            -- Wall Check: Check if there's an obstruction between the camera and the target
-                            local ray = Ray.new(Camera.CFrame.Position, (bodyPart.Position - Camera.CFrame.Position).unit * (bodyPart.Position - Camera.CFrame.Position).Magnitude)
-                            local hitPart = workspace:FindPartOnRay(ray, LocalPlayer.Character)
-                            if not hitPart or hitPart:IsDescendantOf(player.Character) then
+                            if WallCheck(bodyPart.Position) then
                                 closestPlayer = player
                                 closestDistance = distance
                                 targetPos = bodyPart.Position
@@ -160,55 +168,51 @@ local function Aimbot()
             end
         end
 
-        -- Lock onto the closest target
+        -- Lock onto target if one is found
         if closestPlayer and targetPos then
-            local cameraPos = Camera.CFrame.Position
-            local direction = (targetPos - cameraPos).unit
-            Camera.CFrame = CFrame.new(cameraPos, targetPos)
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPos)
         end
 
-        wait(0.05) -- Update every frame for smooth aimbot movement
+        wait(0.05) -- Update every frame
     end
 end
 
--- Run the Aimbot when it's enabled
+-- Render the FOV Circle
+local function RenderFOVCircle()
+    if CircleVisible and FOVCircle then
+        FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
+        FOVCircle.Visible = true
+    else
+        FOVCircle.Visible = false
+    end
+end
+
+-- Event listener for ESP and Aimbot
 RunService.Heartbeat:Connect(function()
-    if _G.AimbotEnabled then
+    UpdateESP()
+    RenderFOVCircle()
+
+    if AimbotEnabled then
         Aimbot()
     end
 end)
 
--- ESP Drawing - Highlight Humanoid
-local function HighlightHumanoid(player)
-    -- Ensure player has a character and humanoid
-    if player.Character and player.Character:FindFirstChild("Humanoid") then
-        local humanoid = player.Character.Humanoid
-
-        -- Ensure the humanoid exists before applying highlight
-        if humanoid then
-            -- Check if the humanoid already has a highlight
-            local existingHighlight = player.Character:FindFirstChild("HumanoidHighlight")
-            if not existingHighlight then
-                -- Apply the highlight effect
-                local highlight = Instance.new("Highlight")
-                highlight.Name = "HumanoidHighlight"
-                highlight.Parent = player.Character
-                highlight.Adornee = player.Character
-                highlight.FillColor = _G.ESPBoxColor
-                highlight.OutlineColor = _G.ESPBoxColor
-                highlight.FillTransparency = 0.5
-                highlight.OutlineTransparency = 0.5
-            end
-        end
-    end
-end
-
--- Update ESP and aimbot features continuously
-RunService.Heartbeat:Connect(function()
-    -- Update ESP (show/hide ESP boxes)
-    if _G.ESPEnabled then
-        for _, player in pairs(Players:GetPlayers()) do
-            HighlightHumanoid(player)
-        end
+-- Event listener for player joining and leaving
+Players.PlayerAdded:Connect(function(player)
+    if player ~= LocalPlayer then
+        CreateESP(player)
     end
 end)
+
+Players.PlayerRemoving:Connect(function(player)
+    if ESPDrawings[player] then
+        ESPDrawings[player].Visible = false
+        ESPDrawings[player] = nil
+    end
+end)
+
+-- Initialize FOV Circle
+CreateFOVCircle()
+
+-- Create a simple toggle menu for settings
+ScreenGui.Parent = game:GetService("CoreGui")
