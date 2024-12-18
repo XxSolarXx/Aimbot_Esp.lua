@@ -156,7 +156,7 @@ local function Aimbot()
         if closestPlayer and targetPos then
             local cameraPos = Camera.CFrame.Position
             local direction = (targetPos - cameraPos).unit
-            local lockStrength = 0.2  -- Increase this value to make the aimbot stronger
+            local lockStrength = 0.3  -- Increased to make the aimbot stronger
             local adjustedDirection = direction * lockStrength + (Camera.CFrame.LookVector * (1 - lockStrength))  -- Apply correction
             Camera.CFrame = CFrame.new(cameraPos, cameraPos + adjustedDirection)
         end
@@ -208,14 +208,12 @@ end)
 RunService.RenderStepped:Connect(function()
     if _G.CircleVisible then
         local mousePos = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
-        local fovCircle = Instance.new("Frame")
-        fovCircle.Size = UDim2.new(0, _G.FOVSize * 2, 0, _G.FOVSize * 2)
-        fovCircle.Position = UDim2.new(0, mousePos.X - _G.FOVSize, 0, mousePos.Y - _G.FOVSize)
-        fovCircle.BackgroundColor3 = _G.FOVColor
-        fovCircle.BackgroundTransparency = 0.5
-        fovCircle.BorderSizePixel = 0
-        fovCircle.Parent = ScreenGui
-        wait(0.1)
-        fovCircle:Destroy()
+        local circle = Drawing.new("Circle")
+        circle.Radius = _G.FOVSize
+        circle.Position = mousePos
+        circle.Color = _G.FOVColor
+        circle.Thickness = 2
+        circle.Filled = true
+        circle.Transparency = 1
     end
 end)
