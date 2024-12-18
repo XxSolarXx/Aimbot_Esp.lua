@@ -106,12 +106,13 @@ local function GetClosestPlayerToCursor()
     local closestPlayer, shortestDistance = nil, Settings.FOVRadius
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local screenPos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
-            if onScreen and not table.find(ExcludedPlayers, player.Name) then
-                local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
-                if distance < shortestDistance then
-                    local playerPos = Vector2.new(screenPos.X, screenPos.Y)
-                    if (playerPos - Vector2.new(Mouse.X, Mouse.Y)).Magnitude <= Settings.FOVRadius then
+            -- Check if the player is not in the exclusion list
+            if not table.find(ExcludedPlayers, player.Name) then
+                local screenPos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+                if onScreen then
+                    local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
+                    -- Check if the player is within the FOV radius and is closer than the previous closest player
+                    if distance < shortestDistance then
                         closestPlayer = player
                         shortestDistance = distance
                     end
@@ -195,8 +196,6 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- GUI and Moveable Code Start Here
-
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = game:GetService("CoreGui")
 screenGui.Enabled = true
@@ -216,31 +215,5 @@ ToggleAimbotButton.Parent = screenGui
 local ToggleFOVButton = Instance.new("TextButton")
 ToggleFOVButton.Size = UDim2.new(0, 200, 0, 50)
 ToggleFOVButton.Position = UDim2.new(0, 10, 0, 130)
-ToggleFOVButton.Text = "Toggle FOV Circle - Off"
+ToggleFOVButton.Text = "Toggle FOV - Off"
 ToggleFOVButton.Parent = screenGui
-
--- Add drag feature to GUI
-local dragging, dragInput, dragStart, startPos
-local function update(input)
-    local delta = input.Position - dragStart
-    screenGui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-end
-
-ToggleESPButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = screenGui.Position
-        input.Changed:Connect(function()
-            if dragging then
-                update(input)
-            end
-        end)
-    end
-end)
-
-ToggleESPButton.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
