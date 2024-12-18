@@ -1,166 +1,153 @@
-local Camera = workspace.CurrentCamera
+local Camera = game.Workspace.CurrentCamera
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
-local Holding = false
 
-_G.AimbotEnabled = false -- Start with aimbot disabled
+-- Initializing settings
+_G.AimbotEnabled = true
 _G.TeamCheck = false
 _G.AimPart = "Head"
-_G.Sensitivity = 0
+_G.Sensitivity = 0.1
 
 _G.CircleSides = 64
 _G.CircleColor = Color3.fromRGB(255, 255, 255)
 _G.CircleTransparency = 0.7
 _G.CircleRadius = 80
 _G.CircleFilled = false
-_G.CircleVisible = false -- Start with FOV circle hidden
-_G.CircleThickness = 0
+_G.CircleVisible = true
+_G.CircleThickness = 0.02
 
-local FOVCircle = Drawing.new("Circle")
-FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-FOVCircle.Radius = _G.CircleRadius
-FOVCircle.Filled = _G.CircleFilled
-FOVCircle.Color = _G.CircleColor
+-- Create GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = LocalPlayer.PlayerGui
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 200, 0, 150)
+MainFrame.Position = UDim2.new(0, 50, 0, 50)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.BackgroundTransparency = 0.5
+MainFrame.Parent = ScreenGui
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(1, 0, 0, 30)
+TitleLabel.Text = "Aimbot & FOV"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TitleLabel.TextSize = 18
+TitleLabel.TextAlignment = Enum.TextAlignment.Center
+TitleLabel.Parent = MainFrame
+
+local ToggleFOVButton = Instance.new("TextButton")
+ToggleFOVButton.Size = UDim2.new(0, 180, 0, 30)
+ToggleFOVButton.Position = UDim2.new(0, 10, 0, 40)
+ToggleFOVButton.Text = "Show FOV Circle"
+ToggleFOVButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleFOVButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+ToggleFOVButton.TextSize = 14
+ToggleFOVButton.Parent = MainFrame
+
+local ToggleAimbotButton = Instance.new("TextButton")
+ToggleAimbotButton.Size = UDim2.new(0, 180, 0, 30)
+ToggleAimbotButton.Position = UDim2.new(0, 10, 0, 80)
+ToggleAimbotButton.Text = "Toggle Aimbot"
+ToggleAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+ToggleAimbotButton.TextSize = 14
+ToggleAimbotButton.Parent = MainFrame
+
+local FOVCircle = Instance.new("Frame")
+FOVCircle.Size = UDim2.new(0, _G.CircleRadius * 2, 0, _G.CircleRadius * 2)
+FOVCircle.Position = UDim2.new(0.5, -_G.CircleRadius, 0.5, -_G.CircleRadius)
+FOVCircle.BackgroundColor3 = _G.CircleColor
+FOVCircle.BackgroundTransparency = _G.CircleTransparency
 FOVCircle.Visible = _G.CircleVisible
-FOVCircle.Radius = _G.CircleRadius
-FOVCircle.Transparency = _G.CircleTransparency
-FOVCircle.NumSides = _G.CircleSides
-FOVCircle.Thickness = _G.CircleThickness
+FOVCircle.Parent = ScreenGui
 
--- Create GUI elements
-local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
-local MenuFrame = Instance.new("Frame", ScreenGui)
-MenuFrame.Size = UDim2.new(0, 250, 0, 150)
-MenuFrame.Position = UDim2.new(0, 10, 0, 10)
-MenuFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-MenuFrame.BackgroundTransparency = 0.6
-MenuFrame.BorderSizePixel = 0
-MenuFrame.Draggable = true
-MenuFrame.Active = true
-MenuFrame.Selectable = true
-
--- Create Title for the Menu
-local Title = Instance.new("TextLabel", MenuFrame)
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.Position = UDim2.new(0, 0, 0, 0)
-Title.Text = "Aimbot & FOV Settings"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Title.BackgroundTransparency = 0.5
-Title.TextSize = 18
-Title.TextAlign = Enum.TextAlign.Center
-
--- Create Show FOV Circle button
-local ShowFovButton = Instance.new("TextButton", MenuFrame)
-ShowFovButton.Size = UDim2.new(1, 0, 0.5, 0)
-ShowFovButton.Position = UDim2.new(0, 0, 0.25, 0)
-ShowFovButton.Text = "Show FOV Circle"
-ShowFovButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
-ShowFovButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ShowFovButton.TextSize = 14
-ShowFovButton.TextButtonMode = Enum.ButtonMode.Toggle
-ShowFovButton.MouseButton1Click:Connect(function()
-    _G.CircleVisible = not _G.CircleVisible -- Toggle visibility of the FOV circle
+-- Toggle FOV Circle
+ToggleFOVButton.MouseButton1Click:Connect(function()
+    _G.CircleVisible = not _G.CircleVisible
     FOVCircle.Visible = _G.CircleVisible
 end)
-ShowFovButton.MouseEnter:Connect(function()
-    ShowFovButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-end)
-ShowFovButton.MouseLeave:Connect(function()
-    ShowFovButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
-end)
 
--- Create Toggle Aimbot button
-local ToggleAimbotButton = Instance.new("TextButton", MenuFrame)
-ToggleAimbotButton.Size = UDim2.new(1, 0, 0.5, 0)
-ToggleAimbotButton.Position = UDim2.new(0, 0, 0.75, 0)
-ToggleAimbotButton.Text = "Toggle Aimbot"
-ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
-ToggleAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleAimbotButton.TextSize = 14
-ToggleAimbotButton.TextButtonMode = Enum.ButtonMode.Toggle
+-- Toggle Aimbot
 ToggleAimbotButton.MouseButton1Click:Connect(function()
-    _G.AimbotEnabled = not _G.AimbotEnabled -- Toggle the aimbot functionality
-end)
-ToggleAimbotButton.MouseEnter:Connect(function()
-    ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-end)
-ToggleAimbotButton.MouseLeave:Connect(function()
-    ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+    _G.AimbotEnabled = not _G.AimbotEnabled
+    if _G.AimbotEnabled then
+        ToggleAimbotButton.Text = "Aimbot Enabled"
+    else
+        ToggleAimbotButton.Text = "Aimbot Disabled"
+    end
 end)
 
--- Aimbot and FOV circle logic
+-- Make GUI movable
+local dragToggle = false
+local dragStart = nil
+local dragPos = nil
+
+local function updateDrag(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(dragPos.X.Scale, delta.X, dragPos.Y.Scale, delta.Y)
+end
+
+TitleLabel.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragToggle = true
+        dragStart = input.Position
+        dragPos = MainFrame.Position
+    end
+end)
+
+TitleLabel.InputChanged:Connect(function(input)
+    if dragToggle and input.UserInputType == Enum.UserInputType.MouseMovement then
+        updateDrag(input)
+    end
+end)
+
+TitleLabel.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragToggle = false
+    end
+end)
+
+-- Function to get closest player for aimbot
 local function GetClosestPlayer()
-    local MaximumDistance = _G.CircleRadius
-    local Target = nil
+    local closestPlayer = nil
+    local shortestDistance = _G.CircleRadius
 
-    for _, v in next, Players:GetPlayers() do
-        if v.Name ~= LocalPlayer.Name then
-            if _G.TeamCheck == true then
-                if v.Team ~= LocalPlayer.Team then
-                    if v.Character ~= nil then
-                        if v.Character:FindFirstChild("HumanoidRootPart") ~= nil then
-                            if v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("Humanoid").Health ~= 0 then
-                                local ScreenPoint = Camera:WorldToScreenPoint(v.Character:WaitForChild("HumanoidRootPart", math.huge).Position)
-                                local VectorDistance = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
-                                
-                                if VectorDistance < MaximumDistance then
-                                    Target = v
-                                end
-                            end
-                        end
-                    end
-                end
-            else
-                if v.Character ~= nil then
-                    if v.Character:FindFirstChild("HumanoidRootPart") ~= nil then
-                        if v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("Humanoid").Health ~= 0 then
-                            local ScreenPoint = Camera:WorldToScreenPoint(v.Character:WaitForChild("HumanoidRootPart", math.huge).Position)
-                            local VectorDistance = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
-                            
-                            if VectorDistance < MaximumDistance then
-                                Target = v
-                            end
-                        end
-                    end
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local screenPosition, onScreen = Camera:WorldToScreenPoint(character.HumanoidRootPart.Position)
+                local mousePos = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+                local distance = (mousePos - Vector2.new(screenPosition.X, screenPosition.Y)).Magnitude
+                if distance < shortestDistance then
+                    closestPlayer = player
+                    shortestDistance = distance
                 end
             end
         end
     end
 
-    return Target
+    return closestPlayer
 end
 
-UserInputService.InputBegan:Connect(function(Input)
-    if Input.UserInputType == Enum.UserInputType.MouseButton2 then
-        Holding = true
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(Input)
-    if Input.UserInputType == Enum.UserInputType.MouseButton2 then
-        Holding = false
-    end
-end)
-
-RunService.RenderStepped:Connect(function()
-    FOVCircle.Position = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
-    FOVCircle.Radius = _G.CircleRadius
-    FOVCircle.Filled = _G.CircleFilled
-    FOVCircle.Color = _G.CircleColor
-    FOVCircle.Visible = _G.CircleVisible
-    FOVCircle.Radius = _G.CircleRadius
-    FOVCircle.Transparency = _G.CircleTransparency
-    FOVCircle.NumSides = _G.CircleSides
-    FOVCircle.Thickness = _G.CircleThickness
-
-    if Holding == true and _G.AimbotEnabled == true then
-        local target = GetClosestPlayer()
-        if target and target.Character and target.Character:FindFirstChild(_G.AimPart) then
-            TweenService:Create(Camera, TweenInfo.new(_G.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = CFrame.new(Camera.CFrame.Position, target.Character[_G.AimPart].Position)}):Play()
+-- Aimbot functionality (when mouse button is held)
+UserInputService.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        if _G.AimbotEnabled then
+            local targetPlayer = GetClosestPlayer()
+            if targetPlayer then
+                local targetPosition = targetPlayer.Character[_G.AimPart].Position
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
+            end
         end
     end
 end)
+
+-- Update the FOV circle position to follow the mouse
+RunService.RenderStepped:Connect(function()
+    FOVCircle.Position = UDim2.new(0, UserInputService:GetMouseLocation().X - _G.CircleRadius, 0, UserInputService:GetMouseLocation().Y - _G.CircleRadius)
+end)
+
