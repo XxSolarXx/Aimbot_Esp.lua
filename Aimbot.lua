@@ -195,6 +195,8 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+-- GUI and Moveable Code Start Here
+
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = game:GetService("CoreGui")
 screenGui.Enabled = true
@@ -214,28 +216,31 @@ ToggleAimbotButton.Parent = screenGui
 local ToggleFOVButton = Instance.new("TextButton")
 ToggleFOVButton.Size = UDim2.new(0, 200, 0, 50)
 ToggleFOVButton.Position = UDim2.new(0, 10, 0, 130)
-ToggleFOVButton.Text = "Toggle FOV Circle - On"
+ToggleFOVButton.Text = "Toggle FOV Circle - Off"
 ToggleFOVButton.Parent = screenGui
 
-ToggleESPButton.MouseButton1Click:Connect(function()
-    Settings.ESPEnabled = not Settings.ESPEnabled
-    UpdateESP()
-    ToggleESPButton.Text = "Toggle ESP - " .. (Settings.ESPEnabled and "On" or "Off")
-end)
+-- Add drag feature to GUI
+local dragging, dragInput, dragStart, startPos
+local function update(input)
+    local delta = input.Position - dragStart
+    screenGui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
 
-ToggleAimbotButton.MouseButton1Click:Connect(function()
-    Settings.AimbotEnabled = not Settings.AimbotEnabled
-    if Settings.AimbotEnabled then
-        ShowAimbotMessage()
-    else
-        RemoveAimbotMessage()
+ToggleESPButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = screenGui.Position
+        input.Changed:Connect(function()
+            if dragging then
+                update(input)
+            end
+        end)
     end
-    ToggleAimbotButton.Text = "Toggle Aimbot - " .. (Settings.AimbotEnabled and "On" or "Off")
 end)
 
-ToggleFOVButton.MouseButton1Click:Connect(function()
-    Settings.FOVCircleVisible = not Settings.FOVCircleVisible
-    ToggleFOVButton.Text = "Toggle FOV Circle - " .. (Settings.FOVCircleVisible and "On" or "Off")
+ToggleESPButton.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
 end)
-
-UpdateESP()
