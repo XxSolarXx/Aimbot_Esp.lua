@@ -190,7 +190,10 @@ RunService.RenderStepped:Connect(function()
             local cameraPos = Camera.CFrame.Position
             local direction = (targetPos - cameraPos).unit
             local newCFrame = CFrame.lookAt(cameraPos, targetPos)
-            Camera.CFrame = Camera.CFrame:Lerp(newCFrame, 0.2)  -- Increased speed of lock-on
+
+            -- Increased lock-on strength by adjusting Lerp factor
+            local strength = 0.5  -- You can adjust this value (0.5 to 1.0) for stronger or weaker lock-on
+            Camera.CFrame = Camera.CFrame:Lerp(newCFrame, strength)  -- Increased lock-on speed
         end
     end
 end)
@@ -237,5 +240,3 @@ ToggleFOVButton.MouseButton1Click:Connect(function()
     Settings.FOVCircleVisible = not Settings.FOVCircleVisible
     ToggleFOVButton.Text = "Toggle FOV Circle - " .. (Settings.FOVCircleVisible and "On" or "Off")
 end)
-
-UpdateESP()
