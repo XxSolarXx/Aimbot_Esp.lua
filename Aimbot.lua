@@ -8,7 +8,7 @@ local Mouse = LocalPlayer:GetMouse()
 local Settings = {
     ESPEnabled = false,
     AimbotEnabled = false,
-    FOVRadius = 150,
+    FOVRadius = 100,  -- Reduced the FOV radius to make the circle smaller
     FOVCircleVisible = true
 }
 
