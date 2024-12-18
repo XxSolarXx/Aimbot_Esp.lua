@@ -214,7 +214,6 @@ RunService.RenderStepped:Connect(function()
         fovCircle.BorderSizePixel = 0
         fovCircle.Parent = ScreenGui
         wait(0.1)
-        fovCircle:Destroy()
+        fovCircle:Destroy() -- Remove the circle after each update
     end
 end)
-
