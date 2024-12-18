@@ -43,7 +43,7 @@ local function UpdateESP()
     end
 end
 
--- Aimbot (Targeting Head with Wall Check)
+-- Aimbot (Lock onto only visible players)
 local function GetClosestPlayerToCursor()
     local closestPlayer, shortestDistance = nil, Settings.FOVRadius
     for _, player in ipairs(Players:GetPlayers()) do
@@ -55,16 +55,6 @@ local function GetClosestPlayerToCursor()
             if onScreen then
                 local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
                 if distance < shortestDistance then
-                    -- Perform a wall check using raycasting
-                    local rayOrigin = workspace.CurrentCamera.CFrame.Position
-                    local rayDirection = (head.Position - rayOrigin).Unit * (rayOrigin - head.Position).Magnitude
-                    local ray = workspace:Raycast(rayOrigin, rayDirection)
-                    
-                    if ray and ray.Instance and ray.Instance.Parent ~= character then
-                        -- If ray hits an object that isn't the target's character, we don't aim at them
-                        continue
-                    end
-
                     closestPlayer = player
                     shortestDistance = distance
                 end
@@ -74,20 +64,17 @@ local function GetClosestPlayerToCursor()
     return closestPlayer
 end
 
--- Aimbot Logic (Targeting Head now with wall check)
+-- Aimbot Logic (Targeting only visible players)
 RunService.RenderStepped:Connect(function()
     if Settings.AimbotEnabled then
         local target = GetClosestPlayerToCursor()
         if target and target.Character and target.Character:FindFirstChild("Head") then
             local head = target.Character.Head
-            -- Perform a raycast from the camera to the head
-            local rayOrigin = workspace.CurrentCamera.CFrame.Position
-            local rayDirection = (head.Position - rayOrigin).Unit * (rayOrigin - head.Position).Magnitude
-            local ray = workspace:Raycast(rayOrigin, rayDirection)
-            
-            -- Check if ray hit anything
-            if not ray or (ray.Instance and ray.Instance.Parent == target.Character) then
-                -- If the ray does not hit anything or hits the target, aim at the target
+            -- Perform check if the target's head is visible
+            local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(head.Position)
+
+            -- Only aim at players who are on the screen (visible)
+            if onScreen then
                 workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, head.Position)
             end
         end
