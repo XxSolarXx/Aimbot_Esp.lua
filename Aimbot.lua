@@ -8,7 +8,7 @@ local Mouse = LocalPlayer:GetMouse()
 local Settings = {
     ESPEnabled = false,
     AimbotEnabled = false,
-    FOVRadius = 100,  -- Reduced the FOV radius to make the circle smaller
+    FOVRadius = 150,
     FOVCircleVisible = true
 }
 
@@ -43,12 +43,12 @@ local function UpdateESP()
     end
 end
 
--- Aimbot
+-- Aimbot (Now targeting the Head instead of HumanoidRootPart)
 local function GetClosestPlayerToCursor()
     local closestPlayer, shortestDistance = nil, Settings.FOVRadius
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then  -- Changed to "Head"
+            local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(player.Character.Head.Position)  -- Changed to "Head"
             if onScreen then
                 local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
                 if distance < shortestDistance then
@@ -75,13 +75,13 @@ RunService.RenderStepped:Connect(function()
     FOVCircle.Visible = Settings.FOVCircleVisible
 end)
 
--- Aimbot Logic
+-- Aimbot Logic (Targeting Head now)
 RunService.RenderStepped:Connect(function()
     if Settings.AimbotEnabled then
         local target = GetClosestPlayerToCursor()
-        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        if target and target.Character and target.Character:FindFirstChild("Head") then  -- Changed to "Head"
             Mouse.TargetFilter = target.Character
-            workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Character.HumanoidRootPart.Position)
+            workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Character.Head.Position)  -- Changed to "Head"
         end
     end
 end)
