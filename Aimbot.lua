@@ -94,9 +94,16 @@ end
 
 -- Function to update ESP
 local function UpdateESP()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            AddESPToPlayer(player)
+    if Settings.ESPEnabled then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                AddESPToPlayer(player)
+            end
+        end
+    else
+        -- Remove ESP for all players when disabled
+        for player, highlight in pairs(activeHighlights) do
+            RemoveESPFromPlayer(player)
         end
     end
 end
@@ -194,8 +201,11 @@ RunService.RenderStepped:Connect(function()
         if target and target.Character and target.Character:FindFirstChild("Head") then
             -- Lock onto the player's head instead of their root part
             local targetHead = target.Character.Head
-            Mouse.TargetFilter = target.Character
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetHead.Position)
+            local targetPos = targetHead.Position
+            local cameraPos = Camera.CFrame.Position
+            local direction = (targetPos - cameraPos).unit
+            local newCFrame = CFrame.lookAt(cameraPos, targetPos)
+            Camera.CFrame = Camera.CFrame:Lerp(newCFrame, 0.1)  -- Smooth rotation
         end
     end
 end)
@@ -203,29 +213,31 @@ end)
 -- GUI for toggling ESP, aimbot, and FOV circle
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = game:GetService("CoreGui")
+screenGui.Enabled = true  -- Start with the GUI enabled
 
 local ToggleESPButton = Instance.new("TextButton")
 ToggleESPButton.Size = UDim2.new(0, 200, 0, 50)
 ToggleESPButton.Position = UDim2.new(0, 10, 0, 10)
-ToggleESPButton.Text = "Toggle ESP"
+ToggleESPButton.Text = "Toggle ESP - Off"
 ToggleESPButton.Parent = screenGui
 
 local ToggleAimbotButton = Instance.new("TextButton")
 ToggleAimbotButton.Size = UDim2.new(0, 200, 0, 50)
 ToggleAimbotButton.Position = UDim2.new(0, 10, 0, 70)
-ToggleAimbotButton.Text = "Toggle Aimbot"
+ToggleAimbotButton.Text = "Toggle Aimbot - Off"
 ToggleAimbotButton.Parent = screenGui
 
 local ToggleFOVButton = Instance.new("TextButton")
 ToggleFOVButton.Size = UDim2.new(0, 200, 0, 50)
 ToggleFOVButton.Position = UDim2.new(0, 10, 0, 130)
-ToggleFOVButton.Text = "Toggle FOV Circle"
+ToggleFOVButton.Text = "Toggle FOV Circle - On"
 ToggleFOVButton.Parent = screenGui
 
 -- Button functionality
 ToggleESPButton.MouseButton1Click:Connect(function()
     Settings.ESPEnabled = not Settings.ESPEnabled
     UpdateESP()  -- Update ESP after toggle
+    ToggleESPButton.Text = "Toggle ESP - " .. (Settings.ESPEnabled and "On" or "Off")
 end)
 
 ToggleAimbotButton.MouseButton1Click:Connect(function()
@@ -235,10 +247,12 @@ ToggleAimbotButton.MouseButton1Click:Connect(function()
     else
         RemoveAimbotMessage()
     end
+    ToggleAimbotButton.Text = "Toggle Aimbot - " .. (Settings.AimbotEnabled and "On" or "Off")
 end)
 
 ToggleFOVButton.MouseButton1Click:Connect(function()
     Settings.FOVCircleVisible = not Settings.FOVCircleVisible
+    ToggleFOVButton.Text = "Toggle FOV Circle - " .. (Settings.FOVCircleVisible and "On" or "Off")
 end)
 
 -- Initialize ESP for existing players
