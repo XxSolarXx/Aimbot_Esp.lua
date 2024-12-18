@@ -170,6 +170,15 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         Settings.AimbotEnabled = true
         ShowAimbotMessage()  -- Show message when aimbot is activated
     end
+
+    -- F1 and F2 Key bindings for GUI toggle
+    if input.KeyCode == Enum.KeyCode.F2 then
+        -- Hide GUI
+        screenGui.Enabled = false
+    elseif input.KeyCode == Enum.KeyCode.F1 then
+        -- Show GUI
+        screenGui.Enabled = true
+    end
 end)
 
 UserInputService.InputEnded:Connect(function(input, gameProcessed)
