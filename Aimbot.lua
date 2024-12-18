@@ -2,124 +2,66 @@ local Camera = workspace.CurrentCamera
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
+local Holding = false
 
--- ESP and Aimbot Settings
-_G.ESPEnabled = false
-_G.AimbotEnabled = false
-_G.CircleVisible = false
+_G.AimbotEnabled = true
+_G.TeamCheck = false
+_G.AimPart = "Head"
+_G.Sensitivity = 0
+
+_G.CircleSides = 64
+_G.CircleColor = Color3.fromRGB(255, 255, 255)
+_G.CircleTransparency = 0.7
+_G.CircleRadius = 80
+_G.CircleFilled = false
+_G.CircleVisible = true
+_G.CircleThickness = 0
+
+_G.ESPEnabled = true
 _G.ESPBoxColor = Color3.fromRGB(255, 0, 0)
 _G.ESPBoxThickness = 2
-_G.AimbotFOV = 50  -- Adjust the FOV radius for aimbot targeting
+
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+FOVCircle.Radius = _G.CircleRadius
+FOVCircle.Filled = _G.CircleFilled
+FOVCircle.Color = _G.CircleColor
+FOVCircle.Visible = _G.CircleVisible
+FOVCircle.Transparency = _G.CircleTransparency
+FOVCircle.NumSides = _G.CircleSides
+FOVCircle.Thickness = _G.CircleThickness
 
 -- Create GUI elements
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
 local MenuFrame = Instance.new("Frame", ScreenGui)
-MenuFrame.Size = UDim2.new(0, 200, 0, 150)  -- Adjusted size for more buttons
-MenuFrame.Position = UDim2.new(1, -210, 1, -160)  -- Positioned to the bottom-right
+MenuFrame.Size = UDim2.new(0, 200, 0, 100)
+MenuFrame.Position = UDim2.new(0, 10, 0, 10)
 MenuFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-MenuFrame.BackgroundTransparency = 0.8
+MenuFrame.BackgroundTransparency = 0.5
 
--- Show Fov Button
 local ShowFovButton = Instance.new("TextButton", MenuFrame)
-ShowFovButton.Size = UDim2.new(1, 0, 0.3, 0)
+ShowFovButton.Size = UDim2.new(1, 0, 0.5, 0)
 ShowFovButton.Position = UDim2.new(0, 0, 0, 0)
 ShowFovButton.Text = "Show FOV Circle"
 ShowFovButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ShowFovButton.BackgroundTransparency = 0.8
 ShowFovButton.TextColor3 = Color3.fromRGB(0, 0, 0)
 ShowFovButton.MouseButton1Click:Connect(function()
     _G.CircleVisible = not _G.CircleVisible
 end)
 
--- Toggle Aimbot Button
 local ToggleAimbotButton = Instance.new("TextButton", MenuFrame)
-ToggleAimbotButton.Size = UDim2.new(1, 0, 0.3, 0)
-ToggleAimbotButton.Position = UDim2.new(0, 0, 0.3, 0)
+ToggleAimbotButton.Size = UDim2.new(1, 0, 0.5, 0)
+ToggleAimbotButton.Position = UDim2.new(0, 0, 0.5, 0)
 ToggleAimbotButton.Text = "Toggle Aimbot"
 ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ToggleAimbotButton.BackgroundTransparency = 0.8
 ToggleAimbotButton.TextColor3 = Color3.fromRGB(0, 0, 0)
 ToggleAimbotButton.MouseButton1Click:Connect(function()
     _G.AimbotEnabled = not _G.AimbotEnabled
-    if _G.AimbotEnabled then
-        ToggleAimbotButton.Text = "Aimbot ON"
-    else
-        ToggleAimbotButton.Text = "Aimbot OFF"
-    end
 end)
 
--- Toggle ESP Button
-local ToggleESPButton = Instance.new("TextButton", MenuFrame)
-ToggleESPButton.Size = UDim2.new(1, 0, 0.3, 0)
-ToggleESPButton.Position = UDim2.new(0, 0, 0.6, 0)
-ToggleESPButton.Text = "Toggle ESP"
-ToggleESPButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ToggleESPButton.BackgroundTransparency = 0.8
-ToggleESPButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-ToggleESPButton.MouseButton1Click:Connect(function()
-    _G.ESPEnabled = not _G.ESPEnabled
-end)
-
--- Aimbot Functionality
-local function Aimbot()
-    while _G.AimbotEnabled do
-        local closestPlayer = nil
-        local closestDistance = _G.AimbotFOV
-        local targetPos = nil
-        
-        -- Check for all players in the game
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") then
-                local head = player.Character:FindFirstChild("Head")
-                if head then
-                    local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
-                    if onScreen then
-                        local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)).Magnitude
-                        if _G.CircleVisible then
-                            -- Check if player is inside FOV circle
-                            local circleCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-                            local circleRadius = _G.AimbotFOV
-                            local distanceFromCenter = (Vector2.new(screenPos.X, screenPos.Y) - circleCenter).Magnitude
-                            if distanceFromCenter <= circleRadius then
-                                -- This player is inside the FOV circle
-                                if distance < closestDistance then
-                                    closestPlayer = player
-                                    closestDistance = distance
-                                    targetPos = head.Position
-                                end
-                            end
-                        else
-                            if distance < closestDistance then
-                                closestPlayer = player
-                                closestDistance = distance
-                                targetPos = head.Position
-                            end
-                        end
-                    end
-                end
-            end
-        end
-
-        -- Lock onto the closest player's head
-        if closestPlayer and targetPos then
-            local cameraPos = Camera.CFrame.Position
-            local direction = (targetPos - cameraPos).unit
-            Camera.CFrame = CFrame.new(cameraPos, targetPos)
-        end
-
-        wait(0.05) -- Update every frame for smooth aimbot movement
-    end
-end
-
--- Run the Aimbot when it's enabled
-RunService.Heartbeat:Connect(function()
-    if _G.AimbotEnabled then
-        Aimbot()
-    end
-end)
-
--- ESP Drawing
+-- ESP Drawing Function
 local function DrawESPBox(player)
     -- Ensure player has a character and humanoid
     if player.Character and player.Character:FindFirstChild("Humanoid") then
@@ -128,14 +70,17 @@ local function DrawESPBox(player)
 
         -- Ensure the humanoid and head exist before drawing
         if humanoid and head then
+            -- Get the screen position of the head
             local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
 
+            -- If the head is on the screen, draw the box
             if onScreen then
+                -- Get the bounding box dimensions from the head size (this is roughly the size of the player)
                 local size = head.Size
-                local topLeft = Camera:WorldToViewportPoint(head.Position + Vector3.new(-size.X / 2, size.Y / 2, 0))
-                local bottomRight = Camera:WorldToViewportPoint(head.Position + Vector3.new(size.X / 2, -size.Y / 2, 0))
+                local topLeft = Camera:WorldToViewportPoint(head.Position + Vector3.new(-size.X / 2, size.Y / 2, 0))  -- Top-left corner
+                local bottomRight = Camera:WorldToViewportPoint(head.Position + Vector3.new(size.X / 2, -size.Y / 2, 0))  -- Bottom-right corner
 
-                -- Draw the ESP Box
+                -- Draw the ESP Box (box will form a rectangle around the head)
                 local box = Drawing.new("Line")
                 box.From = Vector2.new(topLeft.X, topLeft.Y)
                 box.To = Vector2.new(topLeft.X, bottomRight.Y)
@@ -168,12 +113,91 @@ local function DrawESPBox(player)
     end
 end
 
--- Update ESP every frame
+-- Aimbot and FOV circle logic
+local function GetClosestPlayer()
+    local MaximumDistance = _G.CircleRadius
+    local Target = nil
+
+    for _, v in next, Players:GetPlayers() do
+        if v.Name ~= LocalPlayer.Name then
+            if _G.TeamCheck == true then
+                if v.Team ~= LocalPlayer.Team then
+                    if v.Character ~= nil then
+                        if v.Character:FindFirstChild("HumanoidRootPart") ~= nil then
+                            if v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("Humanoid").Health ~= 0 then
+                                local ScreenPoint = Camera:WorldToScreenPoint(v.Character:WaitForChild("HumanoidRootPart", math.huge).Position)
+                                local VectorDistance = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
+                                
+                                if VectorDistance < MaximumDistance then
+                                    Target = v
+                                end
+                            end
+                        end
+                    end
+                end
+            else
+                if v.Character ~= nil then
+                    if v.Character:FindFirstChild("HumanoidRootPart") ~= nil then
+                        if v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("Humanoid").Health ~= 0 then
+                            local ScreenPoint = Camera:WorldToScreenPoint(v.Character:WaitForChild("HumanoidRootPart", math.huge).Position)
+                            local VectorDistance = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
+                            
+                            if VectorDistance < MaximumDistance then
+                                Target = v
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return Target
+end
+
+UserInputService.InputBegan:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.MouseButton2 then
+        Holding = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.MouseButton2 then
+        Holding = false
+    end
+end)
+
 RunService.RenderStepped:Connect(function()
+    FOVCircle.Position = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+    FOVCircle.Radius = _G.CircleRadius
+    FOVCircle.Filled = _G.CircleFilled
+    FOVCircle.Color = _G.CircleColor
+    FOVCircle.Visible = _G.CircleVisible
+    FOVCircle.Radius = _G.CircleRadius
+    FOVCircle.Transparency = _G.CircleTransparency
+    FOVCircle.NumSides = _G.CircleSides
+    FOVCircle.Thickness = _G.CircleThickness
+
+    -- ESP update
     if _G.ESPEnabled then
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= LocalPlayer then
                 DrawESPBox(player)
+            end
+        end
+    end
+
+    if Holding == true and _G.AimbotEnabled == true then
+        -- Aimbot locks to the closest player’s head within the FOV circle
+        local target = nil
+        if _G.CircleVisible then
+            target = GetClosestPlayer()
+        end
+        
+        if target then
+            local aimPart = target.Character[_G.AimPart]
+            if aimPart then
+                TweenService:Create(Camera, TweenInfo.new(_G.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = CFrame.new(Camera.CFrame.Position, aimPart.Position)}):Play()
             end
         end
     end
