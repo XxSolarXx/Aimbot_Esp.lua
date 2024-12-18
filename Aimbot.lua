@@ -178,29 +178,32 @@ local function Aimbot()
             local adjustedDirection = direction * lockStrength
             Camera.CFrame = CFrame.new(cameraPos, cameraPos + adjustedDirection)
         end
-        wait(0.1)
+        wait(0.03)  -- small delay to allow gameplay to process
     end
 end
 
--- ESP Functionality
-local function ESP()
+-- Call the aimbot function if enabled
+RunService.Heartbeat:Connect(function()
+    if _G.AimbotEnabled then
+        Aimbot()
+    end
+end)
+
+-- Drawing ESP Boxes and Circles
+local function DrawESP()
     while _G.ESPEnabled do
         for _, player in pairs(Players:GetPlayers()) do
-            if player.Character and player.Character:FindFirstChild("Head") then
-                local head = player.Character.Head
-                local pos, onScreen = Camera:WorldToViewportPoint(head.Position)
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local screenPos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
                 if onScreen then
-                    local boxSize = Vector2.new(100, 100)  -- Adjust box size based on your needs
-                    local boxPos = Vector2.new(pos.X - boxSize.X / 2, pos.Y - boxSize.Y / 2)
-                    -- Draw box around player
-                    local box = Instance.new("Frame")
-                    box.Size = UDim2.new(0, boxSize.X, 0, boxSize.Y)
-                    box.Position = UDim2.new(0, boxPos.X, 0, boxPos.Y)
-                    box.BackgroundColor3 = _G.ESPBoxColor
-                    box.BorderSizePixel = 2
-                    box.Parent = ScreenGui
+                    local espBox = Instance.new("Frame")
+                    espBox.Size = UDim2.new(0, 100, 0, 100)  -- Placeholder ESP box size
+                    espBox.Position = UDim2.new(0, screenPos.X, 0, screenPos.Y)
+                    espBox.BackgroundColor3 = _G.ESPBoxColor
+                    espBox.BackgroundTransparency = 0.5
+                    espBox.Parent = ScreenGui
                     wait(0.1)
-                    box:Destroy()  -- Remove old boxes to avoid overlap
+                    espBox:Destroy()
                 end
             end
         end
@@ -208,13 +211,30 @@ local function ESP()
     end
 end
 
--- Start functionalities
+-- Toggle ESP functionality
 RunService.Heartbeat:Connect(function()
-    if _G.AimbotEnabled then
-        Aimbot()
-    end
     if _G.ESPEnabled then
-        ESP()
+        DrawESP()
+    end
+end)
+
+-- Draw FOV Circle
+local function DrawFOV()
+    while _G.CircleVisible do
+        local fovCircle = Instance.new("CircleHandleAdornment")
+        fovCircle.Radius = _G.FOVSize
+        fovCircle.Color = _G.FOVColor
+        fovCircle.CFrame = Camera.CFrame
+        fovCircle.Adornee = Camera
+        fovCircle.Parent = workspace
+        wait(0.1)
+        fovCircle:Destroy()
+    end
+end
+
+RunService.Heartbeat:Connect(function()
+    if _G.CircleVisible then
+        DrawFOV()
     end
 end)
 
