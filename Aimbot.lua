@@ -28,6 +28,7 @@ highlightTemplate.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 
 local activeHighlights = {}
 
+-- Function to add ESP to a player
 local function AddESPToPlayer(player)
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and not activeHighlights[player] then
         local highlightClone = highlightTemplate:Clone()
@@ -35,6 +36,7 @@ local function AddESPToPlayer(player)
         highlightClone.Parent = player.Character:FindFirstChild("HumanoidRootPart")
         activeHighlights[player] = highlightClone
 
+        -- Name tags
         if Settings.ShowNameTags then
             local nameTag = Instance.new("TextLabel")
             nameTag.Size = UDim2.new(0, 100, 0, 50)
@@ -47,6 +49,7 @@ local function AddESPToPlayer(player)
             nameTag.Parent = Camera:FindFirstChild("PlayerGui")
         end
 
+        -- Health bars
         if Settings.ShowHealthBars then
             local healthBar = Instance.new("Frame")
             healthBar.Size = UDim2.new(0, 100, 0, 10)
@@ -68,6 +71,7 @@ local function AddESPToPlayer(player)
             end)
         end
 
+        -- Distance labels
         if Settings.ShowDistance then
             local distanceLabel = Instance.new("TextLabel")
             distanceLabel.Size = UDim2.new(0, 100, 0, 50)
@@ -82,6 +86,7 @@ local function AddESPToPlayer(player)
     end
 end
 
+-- Function to remove ESP from a player
 local function RemoveESPFromPlayer(player)
     if activeHighlights[player] then
         activeHighlights[player]:Destroy()
@@ -89,6 +94,7 @@ local function RemoveESPFromPlayer(player)
     end
 end
 
+-- Function to update ESP for all players
 local function UpdateESP()
     if Settings.ESPEnabled then
         for _, player in ipairs(Players:GetPlayers()) do
@@ -103,6 +109,7 @@ local function UpdateESP()
     end
 end
 
+-- Function to get the closest player to the cursor
 local function GetClosestPlayerToCursor()
     local closestPlayer, shortestDistance = nil, Settings.FOVRadius
     for _, player in ipairs(Players:GetPlayers()) do
@@ -123,6 +130,7 @@ local function GetClosestPlayerToCursor()
     return closestPlayer
 end
 
+-- FOV Circle
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 1
 FOVCircle.Radius = Settings.FOVRadius
@@ -160,6 +168,7 @@ local function RemoveAimbotMessage()
     end
 end
 
+-- Input handling for toggling features
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
 
@@ -200,6 +209,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+-- GUI for toggling features
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = game:GetService("CoreGui")
 screenGui.Enabled = true
@@ -230,15 +240,16 @@ end)
 
 ToggleAimbotButton.MouseButton1Click:Connect(function()
     Settings.AimbotEnabled = not Settings.AimbotEnabled
-    if Settings.AimbotEnabled then
-        ShowAimbotMessage()
-    else
-        RemoveAimbotMessage()
-    end
     ToggleAimbotButton.Text = "Toggle Aimbot - " .. (Settings.AimbotEnabled and "On" or "Off")
 end)
 
 ToggleFOVButton.MouseButton1Click:Connect(function()
     Settings.FOVCircleVisible = not Settings.FOVCircleVisible
     ToggleFOVButton.Text = "Toggle FOV Circle - " .. (Settings.FOVCircleVisible and "On" or "Off")
+end)
+
+-- Update ESP when new players join
+Players.PlayerAdded:Connect(UpdateESP)
+Players.PlayerRemoving:Connect(function(player)
+    RemoveESPFromPlayer(player)
 end)
