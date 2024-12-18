@@ -174,42 +174,57 @@ local function Aimbot()
         if closestPlayer and targetPos then
             local cameraPos = Camera.CFrame.Position
             local direction = (targetPos - cameraPos).unit
-            local lockStrength = 0.3  -- Increased value for stronger aimbot
-            local adjustedDirection = direction * lockStrength + (Camera.CFrame.LookVector * (1 - lockStrength))  -- Apply correction
-            Camera.CFrame = CFrame.new(cameraPos, cameraPos + adjustedDirection)
+            local lockStrength = 0.3  -- A stronger aim correction factor
+            Camera.CFrame = CFrame.lookAt(cameraPos, targetPos + direction * lockStrength)
         end
 
-        wait(0.05) -- Update every frame for smooth aimbot movement
+        wait(0.1)
     end
 end
 
--- Run the Aimbot when it's enabled
-RunService.Heartbeat:Connect(function()
-    if _G.AimbotEnabled then
-        Aimbot()
-    end
-end)
-
--- ESP Drawing - Highlight Humanoid
-local function HighlightHumanoid(player)
-    -- Ensure player has a character and humanoid
-    if player.Character and player.Character:FindFirstChild("Humanoid") then
-        local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            local box = Instance.new("Frame")
-            box.Size = UDim2.new(0, 50, 0, 50)
-            box.Position = UDim2.new(0, humanoidRootPart.Position.X, 0, humanoidRootPart.Position.Y)
-            box.BackgroundColor3 = _G.ESPBoxColor
-            box.BorderSizePixel = 0
-            box.Visible = _G.ESPEnabled
-            box.Parent = ScreenGui
+-- ESP Functionality
+local function ESP()
+    while _G.ESPEnabled do
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local box = Instance.new("Frame")
+                box.Size = UDim2.new(0, 50, 0, 50)
+                box.Position = UDim2.new(0, player.Character.HumanoidRootPart.Position.X, 0, player.Character.HumanoidRootPart.Position.Y)
+                box.BackgroundColor3 = _G.ESPBoxColor
+                box.BorderSizePixel = 0
+                box.Visible = true
+                box.Parent = ScreenGui
+            end
         end
+        wait(0.1)
     end
 end
 
--- Show ESP for each player
-Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function(character)
-        HighlightHumanoid(player)
+-- FOV Circle Functionality
+local function FOVCircle()
+    local fovCircle = Instance.new("Frame")
+    fovCircle.Size = UDim2.new(0, _G.FOVSize * 2, 0, _G.FOVSize * 2)
+    fovCircle.Position = UDim2.new(0, Camera.ViewportSize.X / 2 - _G.FOVSize, 0, Camera.ViewportSize.Y / 2 - _G.FOVSize)
+    fovCircle.BackgroundColor3 = _G.FOVColor
+    fovCircle.BorderSizePixel = 0
+    fovCircle.Visible = _G.CircleVisible
+    fovCircle.Parent = ScreenGui
+
+    -- Update circle position
+    RunService.RenderStepped:Connect(function()
+        fovCircle.Position = UDim2.new(0, Camera.ViewportSize.X / 2 - _G.FOVSize, 0, Camera.ViewportSize.Y / 2 - _G.FOVSize)
     end)
-end)
+end
+
+-- Start Aimbot and ESP
+if _G.AimbotEnabled then
+    Aimbot()
+end
+
+if _G.ESPEnabled then
+    ESP()
+end
+
+if _G.CircleVisible then
+    FOVCircle()
+end
