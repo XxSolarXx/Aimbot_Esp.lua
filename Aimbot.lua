@@ -25,6 +25,32 @@ MenuFrame.Position = UDim2.new(1, -270, 0, 50)
 MenuFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MenuFrame.BackgroundTransparency = 0.8
 
+-- Make the GUI movable
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+MenuFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = MenuFrame.Position
+    end
+end)
+
+MenuFrame.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        MenuFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+MenuFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
 -- Show FOV Button
 local ShowFovButton = Instance.new("TextButton", MenuFrame)
 ShowFovButton.Size = UDim2.new(1, 0, 0.2, 0)
