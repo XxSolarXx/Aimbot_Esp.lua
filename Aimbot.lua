@@ -101,7 +101,7 @@ local function UpdateESP()
     end
 end
 
--- Aimbot
+-- Aimbot improvements
 local function GetClosestPlayerToCursor()
     local closestPlayer, shortestDistance = nil, Settings.FOVRadius
     for _, player in ipairs(Players:GetPlayers()) do
@@ -200,25 +200,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- ESP Logic
-local function UpdateESP()
-    if Settings.ESPEnabled then
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer then
-                AddESPToPlayer(player)
-            end
-        end
-    else
-        -- Remove ESP when disabled
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer then
-                RemoveESPFromPlayer(player)
-            end
-        end
-    end
-end
-
--- GUI Buttons
+-- GUI for toggling ESP, aimbot, and FOV circle
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = game:GetService("CoreGui")
 
