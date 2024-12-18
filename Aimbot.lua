@@ -67,12 +67,12 @@ FOVCircle.Thickness = 1  -- Thin white circle
 FOVCircle.Radius = Settings.FOVRadius
 FOVCircle.Color = Color3.fromRGB(255, 255, 255)  -- White color
 FOVCircle.Visible = Settings.FOVCircleVisible
-FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
+FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)  -- Position at the mouse cursor
 FOVCircle.Filled = false  -- Set this to false to make the circle hollow
 
 RunService.RenderStepped:Connect(function()
-    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
-    FOVCircle.Visible = Settings.FOVCircleVisible
+    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)  -- Keep updating the position based on mouse
+    FOVCircle.Visible = Settings.FOVCircleVisible  -- Toggle visibility based on the setting
 end)
 
 -- Aimbot Logic (Visibility Check)
@@ -183,16 +183,4 @@ end)
 ToggleFOVButton.MouseButton1Click:Connect(function()
     Settings.FOVCircleVisible = not Settings.FOVCircleVisible
     ToggleFOVButton.Text = Settings.FOVCircleVisible and "FOV: ON" or "FOV: OFF"
-end)
-
--- Update ESP every 5 seconds
-local espUpdateTimer = 0
-RunService.Heartbeat:Connect(function(deltaTime)
-    espUpdateTimer = espUpdateTimer + deltaTime
-    if espUpdateTimer >= 5 then
-        if Settings.ESPEnabled then
-            UpdateESP()
-        end
-        espUpdateTimer = 0
-    end
 end)
