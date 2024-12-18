@@ -186,27 +186,23 @@ local function HighlightHumanoid(player)
                 highlight.Name = "HumanoidHighlight"
                 highlight.Parent = player.Character
                 highlight.FillColor = _G.ESPBoxColor -- Customize the highlight color
-                highlight.FillTransparency = 0.5 -- Set transparency for the highlight
-                highlight.OutlineColor = Color3.fromRGB(255, 0, 0) -- Set outline color for emphasis
-                highlight.OutlineTransparency = 0.8 -- Set outline transparency
+                highlight.FillTransparency = 0.5 -- Set transparency
+                highlight.OutlineTransparency = 0
             end
         end
     end
 end
 
--- Update ESP every frame
+-- Loop for ESP
 RunService.RenderStepped:Connect(function()
     if _G.ESPEnabled then
-        -- Apply highlight to all players
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer then
-                HighlightHumanoid(player)
-            end
+        for _, player in pairs(Players:GetPlayers()) do
+            HighlightHumanoid(player)
         end
     end
 end)
 
--- Draw FOV Circle
+-- Draw FOV Circle and Keep It Circular
 RunService.RenderStepped:Connect(function()
     if _G.CircleVisible then
         local mousePos = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
@@ -221,7 +217,8 @@ RunService.RenderStepped:Connect(function()
         fovCircle.UICorner = Instance.new("UICorner")
         fovCircle.UICorner.CornerRadius = UDim.new(0.5, 0)  -- This creates a perfect circle
 
+        -- Remove after one frame
         wait(0.05)
-        fovCircle:Destroy() -- Remove after a frame to avoid drawing multiple circles
+        fovCircle:Destroy()
     end
 end)
