@@ -209,24 +209,27 @@ local function UpdateESP()
     end
 end
 
--- Toggle buttons for ESP, Aimbot, and FOV circle
+-- GUI Buttons
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game:GetService("CoreGui")
+
 local ToggleESPButton = Instance.new("TextButton")
 ToggleESPButton.Size = UDim2.new(0, 200, 0, 50)
 ToggleESPButton.Position = UDim2.new(0, 10, 0, 10)
 ToggleESPButton.Text = "Toggle ESP"
-ToggleESPButton.Parent = game:GetService("CoreGui")
+ToggleESPButton.Parent = screenGui
 
 local ToggleAimbotButton = Instance.new("TextButton")
 ToggleAimbotButton.Size = UDim2.new(0, 200, 0, 50)
 ToggleAimbotButton.Position = UDim2.new(0, 10, 0, 70)
 ToggleAimbotButton.Text = "Toggle Aimbot"
-ToggleAimbotButton.Parent = game:GetService("CoreGui")
+ToggleAimbotButton.Parent = screenGui
 
 local ToggleFOVButton = Instance.new("TextButton")
 ToggleFOVButton.Size = UDim2.new(0, 200, 0, 50)
 ToggleFOVButton.Position = UDim2.new(0, 10, 0, 130)
 ToggleFOVButton.Text = "Toggle FOV Circle"
-ToggleFOVButton.Parent = game:GetService("CoreGui")
+ToggleFOVButton.Parent = screenGui
 
 -- Button functionality
 ToggleESPButton.MouseButton1Click:Connect(function()
@@ -247,5 +250,5 @@ ToggleFOVButton.MouseButton1Click:Connect(function()
     Settings.FOVCircleVisible = not Settings.FOVCircleVisible
 end)
 
--- Call to initial setup
-UpdateESP()  -- Initialize ESP for existing players
+-- Initialize ESP for existing players
+UpdateESP()
