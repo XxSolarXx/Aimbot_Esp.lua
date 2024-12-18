@@ -211,14 +211,10 @@ RunService.RenderStepped:Connect(function()
         fovCircle.Position = UDim2.new(0, mousePos.X - _G.FOVSize, 0, mousePos.Y - _G.FOVSize)
         fovCircle.BackgroundColor3 = _G.FOVColor
         fovCircle.BackgroundTransparency = 0.5
+        fovCircle.BorderSizePixel = 0
         fovCircle.Parent = ScreenGui
-
-        -- Make the frame a circle
-        fovCircle.UICorner = Instance.new("UICorner")
-        fovCircle.UICorner.CornerRadius = UDim.new(0.5, 0)  -- This creates a perfect circle
-
-        -- Remove after one frame
-        wait(0.05)
+        wait(0.1)
         fovCircle:Destroy()
     end
 end)
+
