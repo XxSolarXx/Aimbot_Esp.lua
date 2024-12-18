@@ -193,56 +193,47 @@ end)
 
 -- ESP Logic
 local function UpdateESP()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            AddESPToPlayer(player)
+    if Settings.ESPEnabled then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                AddESPToPlayer(player)
+            end
+        end
+    else
+        -- Remove ESP when disabled
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                RemoveESPFromPlayer(player)
+            end
         end
     end
 end
 
--- GUI (For toggling ESP settings)
-local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
-local MenuFrame = Instance.new("Frame", ScreenGui)
-MenuFrame.Size = UDim2.new(0, 250, 0, 300)
-MenuFrame.Position = UDim2.new(1, -260, 0.5, -150)
-MenuFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-MenuFrame.BackgroundTransparency = 0.8
-
-local Title = Instance.new("TextLabel", MenuFrame)
-Title.Size = UDim2.new(1, 0, 0.2, 0)
-Title.Text = "ESP & Aimbot Settings"
-Title.BackgroundTransparency = 1
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.SourceSans
-Title.TextSize = 18
-
-local ToggleESPButton = Instance.new("TextButton", MenuFrame)
-ToggleESPButton.Size = UDim2.new(1, 0, 0.2, 0)
-ToggleESPButton.Position = UDim2.new(0, 0, 0.25, 0)
+-- Toggle buttons for ESP, Aimbot, and FOV circle
+local ToggleESPButton = Instance.new("TextButton")
+ToggleESPButton.Size = UDim2.new(0, 200, 0, 50)
+ToggleESPButton.Position = UDim2.new(0, 10, 0, 10)
 ToggleESPButton.Text = "Toggle ESP"
-ToggleESPButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ToggleESPButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-ToggleESPButton.Font = Enum.Font.SourceSans
-ToggleESPButton.TextSize = 16
+ToggleESPButton.Parent = game:GetService("CoreGui")
 
-local ToggleAimbotButton = Instance.new("TextButton", MenuFrame)
-ToggleAimbotButton.Size = UDim2.new(1, 0, 0.2, 0)
-ToggleAimbotButton.Position = UDim2.new(0, 0, 0.5, 0)
+local ToggleAimbotButton = Instance.new("TextButton")
+ToggleAimbotButton.Size = UDim2.new(0, 200, 0, 50)
+ToggleAimbotButton.Position = UDim2.new(0, 10, 0, 70)
 ToggleAimbotButton.Text = "Toggle Aimbot"
-ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ToggleAimbotButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-ToggleAimbotButton.Font = Enum.Font.SourceSans
-ToggleAimbotButton.TextSize = 16
+ToggleAimbotButton.Parent = game:GetService("CoreGui")
 
--- Button to toggle ESP
+local ToggleFOVButton = Instance.new("TextButton")
+ToggleFOVButton.Size = UDim2.new(0, 200, 0, 50)
+ToggleFOVButton.Position = UDim2.new(0, 10, 0, 130)
+ToggleFOVButton.Text = "Toggle FOV Circle"
+ToggleFOVButton.Parent = game:GetService("CoreGui")
+
+-- Button functionality
 ToggleESPButton.MouseButton1Click:Connect(function()
     Settings.ESPEnabled = not Settings.ESPEnabled
-    if Settings.ESPEnabled then
-        UpdateESP()
-    end
+    UpdateESP()  -- Update ESP after toggle
 end)
 
--- Button to toggle Aimbot
 ToggleAimbotButton.MouseButton1Click:Connect(function()
     Settings.AimbotEnabled = not Settings.AimbotEnabled
     if Settings.AimbotEnabled then
@@ -251,3 +242,10 @@ ToggleAimbotButton.MouseButton1Click:Connect(function()
         RemoveAimbotMessage()
     end
 end)
+
+ToggleFOVButton.MouseButton1Click:Connect(function()
+    Settings.FOVCircleVisible = not Settings.FOVCircleVisible
+end)
+
+-- Call to initial setup
+UpdateESP()  -- Initialize ESP for existing players
