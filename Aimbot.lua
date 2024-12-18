@@ -95,29 +95,66 @@ local function IsPlayerVisible(player)
 end
 
 -- Aimbot when right mouse button is pressed
+local aimbotMessage = nil  -- Message display object
+
+local function ShowAimbotMessage()
+    if not aimbotMessage then
+        aimbotMessage = Instance.new("TextLabel")
+        aimbotMessage.Size = UDim2.new(0, 300, 0, 50)
+        aimbotMessage.Position = UDim2.new(0.5, -150, 0, 20)
+        aimbotMessage.Text = "Aimbot locked onto players."
+        aimbotMessage.BackgroundTransparency = 1
+        aimbotMessage.TextColor3 = Color3.fromRGB(255, 255, 255)
+        aimbotMessage.Font = Enum.Font.SourceSansBold
+        aimbotMessage.TextSize = 18
+        aimbotMessage.TextStrokeTransparency = 0.8
+        aimbotMessage.Parent = game:GetService("CoreGui")
+    end
+end
+
+local function RemoveAimbotMessage()
+    if aimbotMessage then
+        aimbotMessage:Destroy()
+        aimbotMessage = nil
+    end
+end
+
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
 
     if input.UserInputType == Enum.UserInputType.MouseButton2 then  -- Right Mouse Button
         Settings.AimbotEnabled = true
+        ShowAimbotMessage()  -- Show message when aimbot is activated
     end
 end)
 
 UserInputService.InputEnded:Connect(function(input, gameProcessed)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then  -- Right Mouse Button
         Settings.AimbotEnabled = false
+        RemoveAimbotMessage()  -- Hide message when aimbot is deactivated
     end
 end)
 
 RunService.RenderStepped:Connect(function()
     if Settings.AimbotEnabled then
         local target = GetClosestPlayerToCursor()
-        if target and IsPlayerVisible(target) and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        if target and IsPlayerVisible(target) and target.Character and target.Character:FindFirstChild("Head") then
+            -- Lock onto the player's head instead of their root part
+            local targetHead = target.Character.Head
             Mouse.TargetFilter = target.Character
-            workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Character.HumanoidRootPart.Position)
+            workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, targetHead.Position)
         end
     end
 end)
+
+-- ESP Logic
+local function UpdateESP()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            AddHighlightToPlayer(player)
+        end
+    end
+end
 
 -- GUI
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
