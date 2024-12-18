@@ -8,7 +8,7 @@ local Mouse = LocalPlayer:GetMouse()
 local Settings = {
     ESPEnabled = false,
     AimbotEnabled = false,
-    FOVRadius = 150,
+    FOVRadius = 150,  -- Default FOV radius
     FOVCircleVisible = true
 }
 
@@ -44,6 +44,8 @@ local function UpdateESP()
 end
 
 -- Aimbot
+local isRightClickHeld = false  -- Track right-click status
+
 local function GetClosestPlayerToCursor()
     local closestPlayer, shortestDistance = nil, Settings.FOVRadius
     for _, player in ipairs(Players:GetPlayers()) do
@@ -77,7 +79,7 @@ end)
 
 -- Aimbot Logic
 RunService.RenderStepped:Connect(function()
-    if Settings.AimbotEnabled then
+    if Settings.AimbotEnabled and isRightClickHeld then
         local target = GetClosestPlayerToCursor()
         if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
             Mouse.TargetFilter = target.Character
@@ -89,7 +91,7 @@ end)
 -- GUI
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
 local MenuFrame = Instance.new("Frame", ScreenGui)
-MenuFrame.Size = UDim2.new(0, 250, 0, 300)
+MenuFrame.Size = UDim2.new(0, 250, 0, 350)
 MenuFrame.Position = UDim2.new(1, -260, 0.5, -150)
 MenuFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 MenuFrame.BackgroundTransparency = 0.8
@@ -129,6 +131,34 @@ ToggleFOVButton.TextColor3 = Color3.fromRGB(0, 0, 0)
 ToggleFOVButton.Font = Enum.Font.SourceSans
 ToggleFOVButton.TextSize = 16
 
+-- FOV Slider
+local FOVSlider = Instance.new("Frame", MenuFrame)
+FOVSlider.Size = UDim2.new(1, -20, 0.2, -10)
+FOVSlider.Position = UDim2.new(0, 10, 0, 230)
+FOVSlider.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+
+local FOVSliderBar = Instance.new("Frame", FOVSlider)
+FOVSliderBar.Size = UDim2.new(1, 0, 0.5, 0)
+FOVSliderBar.Position = UDim2.new(0, 0, 0.25, 0)
+FOVSliderBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+
+local FOVSliderText = Instance.new("TextLabel", FOVSlider)
+FOVSliderText.Size = UDim2.new(1, 0, 0.25, 0)
+FOVSliderText.Position = UDim2.new(0, 0, 0, 0)
+FOVSliderText.Text = "FOV Size: 150"
+FOVSliderText.BackgroundTransparency = 1
+FOVSliderText.TextColor3 = Color3.fromRGB(0, 0, 0)
+FOVSliderText.Font = Enum.Font.SourceSans
+FOVSliderText.TextSize = 16
+
+FOVSliderBar.MouseButton1Drag:Connect(function(input)
+    local newWidth = math.clamp(input.Position.X, 0, FOVSlider.AbsoluteSize.X)
+    FOVSliderBar.Size = UDim2.new(0, newWidth, 0.5, 0)
+    Settings.FOVRadius = math.floor(newWidth / FOVSlider.AbsoluteSize.X * 500)  -- Update FOV size, max 500
+    FOVSliderText.Text = "FOV Size: " .. Settings.FOVRadius
+    FOVCircle.Radius = Settings.FOVRadius  -- Update FOV circle radius
+end)
+
 -- Button Functions
 ToggleESPButton.MouseButton1Click:Connect(function()
     Settings.ESPEnabled = not Settings.ESPEnabled
@@ -150,4 +180,18 @@ end)
 ToggleFOVButton.MouseButton1Click:Connect(function()
     Settings.FOVCircleVisible = not Settings.FOVCircleVisible
     ToggleFOVButton.Text = Settings.FOVCircleVisible and "FOV: ON" or "FOV: OFF"
+end)
+
+-- Aimbot Right-Click Activation
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        isRightClickHeld = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        isRightClickHeld = false
+    end
 end)
