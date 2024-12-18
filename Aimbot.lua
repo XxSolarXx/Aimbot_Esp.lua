@@ -145,62 +145,24 @@ SettingsButton.MouseButton1Click:Connect(function()
     SettingsGui.Visible = not SettingsGui.Visible
 end)
 
--- Aimbot Functionality
-local function Aimbot()
-    while _G.AimbotEnabled do
-        local closestPlayer = nil
-        local closestDistance = _G.FOVSize
-        local targetPos = nil
-
-        -- Check for all players in the game
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") then
-                local bodyPart = player.Character:FindFirstChild(_G.AimbotTarget)
-                if bodyPart then
-                    local screenPos, onScreen = Camera:WorldToViewportPoint(bodyPart.Position)
-                    if onScreen then
-                        local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)).Magnitude
-                        if distance < closestDistance then
-                            closestPlayer = player
-                            closestDistance = distance
-                            targetPos = bodyPart.Position
-                        end
-                    end
-                end
-            end
-        end
-
-        -- Lock onto the closest target with stronger aim correction
-        if closestPlayer and targetPos then
-            local cameraPos = Camera.CFrame.Position
-            local direction = (targetPos - cameraPos).unit
-            local lockStrength = 0.3  -- Increased value for stronger aimbot
-            local adjustedDirection = direction * lockStrength
-            Camera.CFrame = CFrame.new(cameraPos, cameraPos + adjustedDirection)
-        end
-        wait(0.03)  -- small delay to allow gameplay to process
-    end
-end
-
--- Call the aimbot function if enabled
-RunService.Heartbeat:Connect(function()
-    if _G.AimbotEnabled then
-        Aimbot()
-    end
-end)
-
--- Drawing ESP Boxes and Circles
-local function DrawESP()
+-- ESP for humanoids with highlights
+local function HighlightHumanoids()
     while _G.ESPEnabled do
         for _, player in pairs(Players:GetPlayers()) do
-            if player.Character and player.Character:FindFirstChild("Humanoid") then
-                local head = player.Character:FindFirstChild("Head")
-                if head then
-                    local box = Drawing.new("Square")
-                    box.Size = Vector2.new(50, 50)  -- Just a placeholder for the box
-                    box.Position = Vector2.new(Camera.WorldToViewportPoint(head.Position).X, Camera.WorldToViewportPoint(head.Position).Y)
-                    box.Color = _G.ESPBoxColor
-                    box.Visible = true
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") then
+                local humanoid = player.Character:FindFirstChild("Humanoid")
+                if humanoid then
+                    -- Add a Highlight to the humanoid if it doesn't already exist
+                    local highlight = humanoid:FindFirstChild("Highlight")
+                    if not highlight then
+                        highlight = Instance.new("Highlight")
+                        highlight.Parent = humanoid
+                    end
+                    highlight.FillColor = _G.ESPBoxColor  -- Use the ESP box color for the highlight
+                    highlight.FillTransparency = 0.5
+                    highlight.OutlineTransparency = 0.5
+                    highlight.OutlineColor = _G.ESPBoxColor
+                    highlight.Visible = true
                 end
             end
         end
@@ -208,23 +170,41 @@ local function DrawESP()
     end
 end
 
--- Handle showing the FOV circle
-local function ShowFOVCircle()
-    while _G.CircleVisible do
-        local fovCircle = Drawing.new("Circle")
-        fovCircle.Radius = _G.FOVSize
-        fovCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-        fovCircle.Color = _G.FOVColor
-        fovCircle.Visible = true
-        wait(1)
+-- Aimbot Functionality
+local function Aimbot()
+    while _G.AimbotEnabled do
+        local closestTarget = nil
+        local closestDistance = math.huge
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") then
+                local humanoid = player.Character:FindFirstChild("Humanoid")
+                local targetPart = player.Character:FindFirstChild(_G.AimbotTarget)
+                if targetPart then
+                    local screenPos = Camera:WorldToViewportPoint(targetPart.Position)
+                    local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)).Magnitude
+                    if distance < closestDistance then
+                        closestTarget = targetPart
+                        closestDistance = distance
+                    end
+                end
+            end
+        end
+
+        if closestTarget then
+            -- Aim towards the closest target
+            local mouse = game:GetService("Players").LocalPlayer:GetMouse()
+            local targetPos = Camera:WorldToScreenPoint(closestTarget.Position)
+            mouse.Move(targetPos.X, targetPos.Y)
+        end
+        wait(0.1)  -- small delay
     end
 end
 
--- Start ESP and FOV circles
+-- Start ESP and aimbot if enabled
 if _G.ESPEnabled then
-    DrawESP()
+    HighlightHumanoids()
 end
 
-if _G.CircleVisible then
-    ShowFOVCircle()
+if _G.AimbotEnabled then
+    Aimbot()
 end
