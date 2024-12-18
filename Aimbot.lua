@@ -14,6 +14,7 @@ local Settings = {
     ShowHealthBars = true,
     ShowDistance = true,
     ESPColor = Color3.fromRGB(0, 255, 0),
+    AimbotSmoothness = 0.1,  -- A value between 0 (instant) to 1 (very smooth)
 }
 
 local ExcludedPlayers = {
@@ -191,9 +192,10 @@ RunService.RenderStepped:Connect(function()
             local direction = (targetPos - cameraPos).unit
             local newCFrame = CFrame.lookAt(cameraPos, targetPos)
 
-            -- Increased lock-on strength by adjusting Lerp factor
-            local strength = 0.5  -- You can adjust this value (0.5 to 1.0) for stronger or weaker lock-on
-            Camera.CFrame = Camera.CFrame:Lerp(newCFrame, strength)  -- Increased lock-on speed
+            -- Smooth lock-on by lerping towards the target
+            local currentCFrame = Camera.CFrame
+            local smoothedCFrame = currentCFrame:Lerp(newCFrame, Settings.AimbotSmoothness)  -- Smoother transition
+            Camera.CFrame = smoothedCFrame
         end
     end
 end)
