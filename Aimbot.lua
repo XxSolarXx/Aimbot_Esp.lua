@@ -1,3 +1,5 @@
+-- Roblox Aimbot, ESP, FOV, and Settings (Full Expanded Version)
+
 local Players = game:GetService("Players")
 local Camera = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
@@ -22,6 +24,42 @@ MenuFrame.Size = UDim2.new(0, 250, 0, 400)
 MenuFrame.Position = UDim2.new(1, -270, 0, 50)
 MenuFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MenuFrame.BackgroundTransparency = 0.8
+MenuFrame.Active = true -- Allow the menu to be draggable
+
+-- Add drag functionality to the menu
+local dragStart, dragInput, dragDelta
+local function onDragStart(input)
+	dragStart = input.Position
+end
+
+local function onDrag(input)
+	dragDelta = input.Position - dragStart
+	MenuFrame.Position = UDim2.new(MenuFrame.Position.X.Scale, MenuFrame.Position.X.Offset + dragDelta.X, MenuFrame.Position.Y.Scale, MenuFrame.Position.Y.Offset + dragDelta.Y)
+end
+
+local function onDragEnd()
+	dragStart = nil
+	dragInput = nil
+	dragDelta = nil
+end
+
+MenuFrame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		onDragStart(input)
+	end
+end)
+
+MenuFrame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		onDrag(input)
+	end
+end)
+
+MenuFrame.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		onDragEnd()
+	end
+end)
 
 -- Show FOV Button
 local ShowFovButton = Instance.new("TextButton", MenuFrame)
