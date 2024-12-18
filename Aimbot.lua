@@ -65,23 +65,46 @@ local function DrawESPBox(player)
     -- Ensure player has a character and humanoid
     if player.Character and player.Character:FindFirstChild("Humanoid") then
         local humanoid = player.Character.Humanoid
-        local head = player.Character:FindFirstChild("Head")
+        local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
 
-        -- Ensure the humanoid and head exist before drawing
-        if humanoid and head then
-            -- Get the screen position of the head
-            local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
+        -- Ensure the humanoid and root part exist before drawing
+        if humanoid and rootPart then
+            -- Get the screen position of the HumanoidRootPart and all the extremities
+            local head = player.Character:FindFirstChild("Head")
+            local leftLeg = player.Character:FindFirstChild("LeftLeg")
+            local rightLeg = player.Character:FindFirstChild("RightLeg")
+            local leftArm = player.Character:FindFirstChild("LeftArm")
+            local rightArm = player.Character:FindFirstChild("RightArm")
 
-            -- If the head is on the screen, draw the box
-            if onScreen then
-                -- Get the bounding box dimensions from the head size (this is roughly the size of the player)
-                local size = head.Size
-                local topLeft = Camera:WorldToViewportPoint(head.Position + Vector3.new(-size.X / 2, size.Y / 2, 0))  -- Top-left corner
-                local bottomRight = Camera:WorldToViewportPoint(head.Position + Vector3.new(size.X / 2, -size.Y / 2, 0))  -- Bottom-right corner
+            if head and leftLeg and rightLeg and leftArm and rightArm then
+                -- Get all the positions for the extremities
+                local positions = {
+                    rootPart.Position, 
+                    head.Position, 
+                    leftLeg.Position, 
+                    rightLeg.Position, 
+                    leftArm.Position, 
+                    rightArm.Position
+                }
 
-                -- Draw the ESP Box (box will form a rectangle around the head)
+                local screenPositions = {}
+                for _, pos in ipairs(positions) do
+                    table.insert(screenPositions, Camera:WorldToViewportPoint(pos))
+                end
+
+                -- Calculate the top-left and bottom-right corners of the bounding box
+                local topLeft = Vector2.new(math.huge, math.huge)
+                local bottomRight = Vector2.new(-math.huge, -math.huge)
+
+                -- Find the extreme points (top-left, bottom-right)
+                for _, sp in ipairs(screenPositions) do
+                    topLeft = Vector2.new(math.min(topLeft.X, sp.X), math.min(topLeft.Y, sp.Y))
+                    bottomRight = Vector2.new(math.max(bottomRight.X, sp.X), math.max(bottomRight.Y, sp.Y))
+                end
+
+                -- Draw the ESP Box (box will form a rectangle around the character)
                 local box = Drawing.new("Line")
-                box.From = Vector2.new(topLeft.X, topLeft.Y)
+                box.From = topLeft
                 box.To = Vector2.new(topLeft.X, bottomRight.Y)
                 box.Color = _G.ESPBoxColor
                 box.Thickness = _G.ESPBoxThickness
@@ -103,7 +126,7 @@ local function DrawESPBox(player)
 
                 local box4 = Drawing.new("Line")
                 box4.From = Vector2.new(bottomRight.X, topLeft.Y)
-                box4.To = Vector2.new(topLeft.X, topLeft.Y)
+                box4.To = topLeft
                 box4.Color = _G.ESPBoxColor
                 box4.Thickness = _G.ESPBoxThickness
                 box4.Visible = _G.ESPEnabled
@@ -196,7 +219,7 @@ RunService.RenderStepped:Connect(function()
         if target then
             local aimPart = target.Character[_G.AimPart]
             if aimPart then
-                TweenService:Create(Camera, TweenInfo.new(_G.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = CFrame.new(Camera.CFrame.Position, aimPart.Position)}):Play()
+                TweenService:Create(Camera, TweenInfo.new(_G.Sensitivity, Enum.EasingStyle.Linear), {CFrame = CFrame.new(aimPart.Position)}):Play()
             end
         end
     end
