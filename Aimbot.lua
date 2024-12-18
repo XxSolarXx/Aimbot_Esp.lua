@@ -193,17 +193,14 @@ end)
 local function DrawESP()
     while _G.ESPEnabled do
         for _, player in pairs(Players:GetPlayers()) do
-            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                local screenPos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
-                if onScreen then
-                    local espBox = Instance.new("Frame")
-                    espBox.Size = UDim2.new(0, 100, 0, 100)  -- Placeholder ESP box size
-                    espBox.Position = UDim2.new(0, screenPos.X, 0, screenPos.Y)
-                    espBox.BackgroundColor3 = _G.ESPBoxColor
-                    espBox.BackgroundTransparency = 0.5
-                    espBox.Parent = ScreenGui
-                    wait(0.1)
-                    espBox:Destroy()
+            if player.Character and player.Character:FindFirstChild("Humanoid") then
+                local head = player.Character:FindFirstChild("Head")
+                if head then
+                    local box = Drawing.new("Square")
+                    box.Size = Vector2.new(50, 50)  -- Just a placeholder size
+                    box.Position = Vector2.new(100, 100)  -- Placeholder for actual positioning logic
+                    box.Color = _G.ESPBoxColor
+                    box.Thickness = 2
                 end
             end
         end
@@ -211,30 +208,21 @@ local function DrawESP()
     end
 end
 
--- Toggle ESP functionality
+-- Toggle ESP
 RunService.Heartbeat:Connect(function()
     if _G.ESPEnabled then
         DrawESP()
     end
 end)
 
--- Draw FOV Circle
-local function DrawFOV()
-    while _G.CircleVisible do
-        local fovCircle = Instance.new("CircleHandleAdornment")
-        fovCircle.Radius = _G.FOVSize
-        fovCircle.Color = _G.FOVColor
-        fovCircle.CFrame = Camera.CFrame
-        fovCircle.Adornee = Camera
-        fovCircle.Parent = workspace
-        wait(0.1)
-        fovCircle:Destroy()
-    end
-end
-
+-- Display FOV Circle
 RunService.Heartbeat:Connect(function()
     if _G.CircleVisible then
-        DrawFOV()
+        local fovCircle = Drawing.new("Circle")
+        fovCircle.Radius = _G.FOVSize
+        fovCircle.Position = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+        fovCircle.Color = _G.FOVColor
+        fovCircle.Thickness = 2
+        fovCircle.Visible = true
     end
 end)
-
