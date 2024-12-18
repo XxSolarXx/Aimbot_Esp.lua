@@ -203,16 +203,6 @@ RunService.RenderStepped:Connect(function()
                 HighlightHumanoid(player)
             end
         end
-    else
-        -- Remove highlight if ESP is disabled
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer then
-                local existingHighlight = player.Character:FindFirstChild("HumanoidHighlight")
-                if existingHighlight then
-                    existingHighlight:Destroy()
-                end
-            end
-        end
     end
 end)
 
@@ -226,6 +216,11 @@ RunService.RenderStepped:Connect(function()
         fovCircle.BackgroundColor3 = _G.FOVColor
         fovCircle.BackgroundTransparency = 0.5
         fovCircle.Parent = ScreenGui
+
+        -- Make the frame a circle
+        fovCircle.UICorner = Instance.new("UICorner")
+        fovCircle.UICorner.CornerRadius = UDim.new(0.5, 0)  -- This creates a perfect circle
+
         wait(0.05)
         fovCircle:Destroy() -- Remove after a frame to avoid drawing multiple circles
     end
