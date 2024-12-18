@@ -152,11 +152,13 @@ local function Aimbot()
             end
         end
 
-        -- Lock onto the closest target
+        -- Lock onto the closest target with stronger aim correction
         if closestPlayer and targetPos then
             local cameraPos = Camera.CFrame.Position
             local direction = (targetPos - cameraPos).unit
-            Camera.CFrame = CFrame.new(cameraPos, targetPos)
+            local lockStrength = 0.2  -- Increase this value to make the aimbot stronger
+            local adjustedDirection = direction * lockStrength + (Camera.CFrame.LookVector * (1 - lockStrength))  -- Apply correction
+            Camera.CFrame = CFrame.new(cameraPos, cameraPos + adjustedDirection)
         end
 
         wait(0.05) -- Update every frame for smooth aimbot movement
@@ -211,9 +213,7 @@ RunService.RenderStepped:Connect(function()
         fovCircle.Position = UDim2.new(0, mousePos.X - _G.FOVSize, 0, mousePos.Y - _G.FOVSize)
         fovCircle.BackgroundColor3 = _G.FOVColor
         fovCircle.BackgroundTransparency = 0.5
-        fovCircle.BorderSizePixel = 0
+        fovCircle.AnchorPoint = Vector2.new(0.5, 0.5)
         fovCircle.Parent = ScreenGui
-        wait(0.1)
-        fovCircle:Destroy() -- Remove the circle after each update
     end
 end)
