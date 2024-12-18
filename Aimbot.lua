@@ -201,6 +201,10 @@ end)
 ToggleAimbotButton.MouseButton1Click:Connect(function()
     Settings.AimbotEnabled = not Settings.AimbotEnabled
     ToggleAimbotButton.Text = Settings.AimbotEnabled and "Aimbot: ON" or "Aimbot: OFF"
+    -- Disable aimbot if it's turned off
+    if not Settings.AimbotEnabled then
+        RemoveAimbotMessage()  -- Hide message if aimbot is turned off
+    end
 end)
 
 ToggleFOVButton.MouseButton1Click:Connect(function()
