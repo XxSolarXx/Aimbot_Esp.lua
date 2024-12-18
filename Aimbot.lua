@@ -87,7 +87,7 @@ local function ShowAimbotMessage()
     if not aimbotMessage then
         aimbotMessage = Instance.new("TextLabel")
         aimbotMessage.Size = UDim2.new(0, 300, 0, 50)
-        aimbotMessage.Position = UDim2.new(0.5, -150, 0, 20)
+        aimbotMessage.Position = UDim2.new(0.5, -150, 0, 20)  -- Position at the top of the screen
         aimbotMessage.Text = "Aimbot locked onto players."
         aimbotMessage.BackgroundTransparency = 1
         aimbotMessage.TextColor3 = Color3.fromRGB(255, 255, 255)
