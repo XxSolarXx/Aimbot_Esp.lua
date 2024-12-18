@@ -1,5 +1,3 @@
--- Roblox Aimbot, ESP, FOV, and Settings (Full Expanded Version)
-
 local Players = game:GetService("Players")
 local Camera = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
