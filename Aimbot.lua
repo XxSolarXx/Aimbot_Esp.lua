@@ -19,8 +19,8 @@ _G.CircleVisible = true
 _G.CircleThickness = 0
 
 _G.ESPEnabled = true
-_G.ESPLineColor = Color3.fromRGB(255, 0, 0)
-_G.ESPLineThickness = 2
+_G.ESPBoxColor = Color3.fromRGB(255, 0, 0)
+_G.ESPBoxThickness = 2
 
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
@@ -60,8 +60,8 @@ ToggleAimbotButton.MouseButton1Click:Connect(function()
     _G.AimbotEnabled = not _G.AimbotEnabled
 end)
 
--- Skeleton ESP Drawing Function
-local function DrawSkeletonESP(player)
+-- ESP Drawing Function
+local function DrawESPBox(player)
     -- Ensure player has a character and humanoid
     if player.Character and player.Character:FindFirstChild("Humanoid") then
         local humanoid = player.Character.Humanoid
@@ -69,19 +69,18 @@ local function DrawSkeletonESP(player)
 
         -- Ensure the humanoid and root part exist before drawing
         if humanoid and rootPart then
-            -- Get the screen position of the HumanoidRootPart and other key parts
+            -- Get the screen position of the HumanoidRootPart and all the extremities
             local head = player.Character:FindFirstChild("Head")
-            local torso = player.Character:FindFirstChild("UpperTorso") or player.Character:FindFirstChild("Torso")
             local leftLeg = player.Character:FindFirstChild("LeftLeg")
             local rightLeg = player.Character:FindFirstChild("RightLeg")
             local leftArm = player.Character:FindFirstChild("LeftArm")
             local rightArm = player.Character:FindFirstChild("RightArm")
 
-            if head and torso and leftLeg and rightLeg and leftArm and rightArm then
+            if head and leftLeg and rightLeg and leftArm and rightArm then
                 -- Get all the positions for the extremities
                 local positions = {
+                    rootPart.Position, 
                     head.Position, 
-                    torso.Position, 
                     leftLeg.Position, 
                     rightLeg.Position, 
                     leftArm.Position, 
@@ -93,24 +92,44 @@ local function DrawSkeletonESP(player)
                     table.insert(screenPositions, Camera:WorldToViewportPoint(pos))
                 end
 
-                -- Draw lines between body parts to form a skeleton
-                local function drawLine(from, to)
-                    local line = Drawing.new("Line")
-                    line.From = from
-                    line.To = to
-                    line.Color = _G.ESPLineColor
-                    line.Thickness = _G.ESPLineThickness
-                    line.Visible = _G.ESPEnabled
+                -- Calculate the top-left and bottom-right corners of the bounding box
+                local topLeft = Vector2.new(math.huge, math.huge)
+                local bottomRight = Vector2.new(-math.huge, -math.huge)
+
+                -- Find the extreme points (top-left, bottom-right)
+                for _, sp in ipairs(screenPositions) do
+                    topLeft = Vector2.new(math.min(topLeft.X, sp.X), math.min(topLeft.Y, sp.Y))
+                    bottomRight = Vector2.new(math.max(bottomRight.X, sp.X), math.max(bottomRight.Y, sp.Y))
                 end
 
-                -- Draw skeleton lines (torso to arms, legs, and head)
-                drawLine(screenPositions[1], screenPositions[2])  -- Head to Torso
-                drawLine(screenPositions[2], screenPositions[3])  -- Torso to Left Leg
-                drawLine(screenPositions[2], screenPositions[4])  -- Torso to Right Leg
-                drawLine(screenPositions[2], screenPositions[5])  -- Torso to Left Arm
-                drawLine(screenPositions[2], screenPositions[6])  -- Torso to Right Arm
-                drawLine(screenPositions[5], screenPositions[1])  -- Left Arm to Head
-                drawLine(screenPositions[6], screenPositions[1])  -- Right Arm to Head
+                -- Draw the ESP Box (box will form a rectangle around the character)
+                local box = Drawing.new("Line")
+                box.From = topLeft
+                box.To = Vector2.new(topLeft.X, bottomRight.Y)
+                box.Color = _G.ESPBoxColor
+                box.Thickness = _G.ESPBoxThickness
+                box.Visible = _G.ESPEnabled
+
+                local box2 = Drawing.new("Line")
+                box2.From = Vector2.new(topLeft.X, bottomRight.Y)
+                box2.To = Vector2.new(bottomRight.X, bottomRight.Y)
+                box2.Color = _G.ESPBoxColor
+                box2.Thickness = _G.ESPBoxThickness
+                box2.Visible = _G.ESPEnabled
+
+                local box3 = Drawing.new("Line")
+                box3.From = Vector2.new(bottomRight.X, bottomRight.Y)
+                box3.To = Vector2.new(bottomRight.X, topLeft.Y)
+                box3.Color = _G.ESPBoxColor
+                box3.Thickness = _G.ESPBoxThickness
+                box3.Visible = _G.ESPEnabled
+
+                local box4 = Drawing.new("Line")
+                box4.From = Vector2.new(bottomRight.X, topLeft.Y)
+                box4.To = topLeft
+                box4.Color = _G.ESPBoxColor
+                box4.Thickness = _G.ESPBoxThickness
+                box4.Visible = _G.ESPEnabled
             end
         end
     end
@@ -185,7 +204,7 @@ RunService.RenderStepped:Connect(function()
     if _G.ESPEnabled then
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= LocalPlayer then
-                DrawSkeletonESP(player)
+                DrawESPBox(player)
             end
         end
     end
