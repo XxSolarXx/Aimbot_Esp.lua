@@ -67,10 +67,10 @@ FOVCircle.Thickness = 1  -- Thin white circle
 FOVCircle.Radius = Settings.FOVRadius
 FOVCircle.Color = Color3.fromRGB(255, 255, 255)  -- White color
 FOVCircle.Visible = Settings.FOVCircleVisible
-FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
 FOVCircle.Filled = false  -- Set this to false to make the circle hollow
 
 RunService.RenderStepped:Connect(function()
+    -- Update the FOV circle's position to match the mouse's position
     FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
     FOVCircle.Visible = Settings.FOVCircleVisible
 end)
