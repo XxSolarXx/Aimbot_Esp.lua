@@ -8,7 +8,7 @@ local Mouse = LocalPlayer:GetMouse()
 local Settings = {
     ESPEnabled = false,
     AimbotEnabled = false,
-    FOVRadius = 150,
+    FOVRadius = 100,  -- Smaller FOV circle radius
     FOVCircleVisible = true
 }
 
@@ -43,15 +43,12 @@ local function UpdateESP()
     end
 end
 
--- Aimbot (Lock onto only visible players)
+-- Aimbot
 local function GetClosestPlayerToCursor()
     local closestPlayer, shortestDistance = nil, Settings.FOVRadius
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-            local character = player.Character
-            local head = character.Head
-            local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(head.Position)
-
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
             if onScreen then
                 local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
                 if distance < shortestDistance then
@@ -63,23 +60,6 @@ local function GetClosestPlayerToCursor()
     end
     return closestPlayer
 end
-
--- Aimbot Logic (Targeting only visible players)
-RunService.RenderStepped:Connect(function()
-    if Settings.AimbotEnabled then
-        local target = GetClosestPlayerToCursor()
-        if target and target.Character and target.Character:FindFirstChild("Head") then
-            local head = target.Character.Head
-            -- Perform check if the target's head is visible
-            local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(head.Position)
-
-            -- Only aim at players who are on the screen (visible)
-            if onScreen then
-                workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, head.Position)
-            end
-        end
-    end
-end)
 
 -- FOV Circle (Hollow White Ring)
 local FOVCircle = Drawing.new("Circle")
@@ -93,6 +73,32 @@ FOVCircle.Filled = false  -- Set this to false to make the circle hollow
 RunService.RenderStepped:Connect(function()
     FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
     FOVCircle.Visible = Settings.FOVCircleVisible
+end)
+
+-- Aimbot Logic
+local function IsPlayerVisible(player)
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local playerRootPart = player.Character.HumanoidRootPart
+        local camera = workspace.CurrentCamera
+        local _, onScreen = camera:WorldToViewportPoint(playerRootPart.Position)
+        if onScreen then
+            -- Check if the player's root part is not obstructed by walls
+            local ray = Ray.new(camera.CFrame.Position, playerRootPart.Position - camera.CFrame.Position)
+            local hit, position = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
+            return not hit  -- Return true if no obstruction is detected
+        end
+    end
+    return false
+end
+
+RunService.RenderStepped:Connect(function()
+    if Settings.AimbotEnabled then
+        local target = GetClosestPlayerToCursor()
+        if target and IsPlayerVisible(target) and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            Mouse.TargetFilter = target.Character
+            workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Character.HumanoidRootPart.Position)
+        end
+    end
 end)
 
 -- GUI
