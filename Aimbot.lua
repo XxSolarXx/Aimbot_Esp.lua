@@ -122,48 +122,55 @@ end)
 -- GUI
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
 local MenuFrame = Instance.new("Frame", ScreenGui)
-MenuFrame.Size = UDim2.new(0, 250, 0, 300)
-MenuFrame.Position = UDim2.new(1, -260, 0.5, -150)
-MenuFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+MenuFrame.Size = UDim2.new(0, 300, 0, 400)
+MenuFrame.Position = UDim2.new(1, -320, 0.5, -200)
+MenuFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MenuFrame.BackgroundTransparency = 0.8
+MenuFrame.BorderSizePixel = 0
+MenuFrame.ClipsDescendants = true
+MenuFrame.AnchorPoint = Vector2.new(1, 0.5)
 
+-- Title
 local Title = Instance.new("TextLabel", MenuFrame)
 Title.Size = UDim2.new(1, 0, 0.2, 0)
-Title.Text = "ESP & Aimbot Settings"
+Title.Text = "ESP & Aimbot"
 Title.BackgroundTransparency = 1
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.SourceSans
-Title.TextSize = 18
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 22
+Title.TextStrokeTransparency = 0.6
+Title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 
-local ToggleESPButton = Instance.new("TextButton", MenuFrame)
-ToggleESPButton.Size = UDim2.new(1, 0, 0.2, 0)
-ToggleESPButton.Position = UDim2.new(0, 0, 0.25, 0)
-ToggleESPButton.Text = "Toggle ESP"
-ToggleESPButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ToggleESPButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-ToggleESPButton.Font = Enum.Font.SourceSans
-ToggleESPButton.TextSize = 16
+-- Button Styling
+local function createStyledButton(text, size, position, callback)
+    local button = Instance.new("TextButton", MenuFrame)
+    button.Size = size
+    button.Position = position
+    button.Text = text
+    button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextColor3 = Color3.fromRGB(0, 0, 0)
+    button.Font = Enum.Font.Gotham
+    button.TextSize = 18
+    button.BorderRadius = UDim.new(0, 12)
+    button.BorderSizePixel = 0
+    button.BackgroundTransparency = 0.2
+    button.TextStrokeTransparency = 0.8
+    button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    
+    -- Hover Effect
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    end)
+    button.MouseLeave:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    end)
+    
+    button.MouseButton1Click:Connect(callback)
+    return button
+end
 
-local ToggleAimbotButton = Instance.new("TextButton", MenuFrame)
-ToggleAimbotButton.Size = UDim2.new(1, 0, 0.2, 0)
-ToggleAimbotButton.Position = UDim2.new(0, 0, 0.5, 0)
-ToggleAimbotButton.Text = "Toggle Aimbot"
-ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ToggleAimbotButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-ToggleAimbotButton.Font = Enum.Font.SourceSans
-ToggleAimbotButton.TextSize = 16
-
-local ToggleFOVButton = Instance.new("TextButton", MenuFrame)
-ToggleFOVButton.Size = UDim2.new(1, 0, 0.2, 0)
-ToggleFOVButton.Position = UDim2.new(0, 0, 0.75, 0)
-ToggleFOVButton.Text = "Toggle FOV Circle"
-ToggleFOVButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ToggleFOVButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-ToggleFOVButton.Font = Enum.Font.SourceSans
-ToggleFOVButton.TextSize = 16
-
--- Button Functions
-ToggleESPButton.MouseButton1Click:Connect(function()
+-- Create Buttons
+local ToggleESPButton = createStyledButton("Toggle ESP", UDim2.new(1, 0, 0.2, 0), UDim2.new(0, 0, 0.25, 0), function()
     Settings.ESPEnabled = not Settings.ESPEnabled
     ToggleESPButton.Text = Settings.ESPEnabled and "ESP: ON" or "ESP: OFF"
     if Settings.ESPEnabled then
@@ -175,12 +182,15 @@ ToggleESPButton.MouseButton1Click:Connect(function()
     end
 end)
 
-ToggleAimbotButton.MouseButton1Click:Connect(function()
+local ToggleAimbotButton = createStyledButton("Toggle Aimbot", UDim2.new(1, 0, 0.2, 0), UDim2.new(0, 0, 0.5, 0), function()
     Settings.AimbotEnabled = not Settings.AimbotEnabled
     ToggleAimbotButton.Text = Settings.AimbotEnabled and "Aimbot: ON" or "Aimbot: OFF"
 end)
 
-ToggleFOVButton.MouseButton1Click:Connect(function()
+local ToggleFOVButton = createStyledButton("Toggle FOV Circle", UDim2.new(1, 0, 0.2, 0), UDim2.new(0, 0, 0.75, 0), function()
     Settings.FOVCircleVisible = not Settings.FOVCircleVisible
     ToggleFOVButton.Text = Settings.FOVCircleVisible and "FOV: ON" or "FOV: OFF"
 end)
+
+-- Add all elements to the GUI
+ScreenGui.Parent = game.CoreGui
