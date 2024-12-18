@@ -17,7 +17,7 @@ _G.AimbotTarget = "Head"  -- Default target for aimbot
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
 local MenuFrame = Instance.new("Frame", ScreenGui)
 MenuFrame.Size = UDim2.new(0, 200, 0, 150)
-MenuFrame.Position = UDim2.new(1, -210, 1, -160)
+MenuFrame.Position = UDim2.new(1, -210, 1, -130)
 MenuFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 MenuFrame.BackgroundTransparency = 0.8
 
