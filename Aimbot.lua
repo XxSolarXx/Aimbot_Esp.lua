@@ -175,41 +175,46 @@ local function Aimbot()
             local cameraPos = Camera.CFrame.Position
             local direction = (targetPos - cameraPos).unit
             local lockStrength = 0.3  -- Increased value for stronger aimbot
-            local adjustedDirection = direction * lockStrength + (Camera.CFrame.LookVector * (1 - lockStrength))  -- Apply correction
+            local adjustedDirection = direction * lockStrength
             Camera.CFrame = CFrame.new(cameraPos, cameraPos + adjustedDirection)
         end
-
-        wait(0.05) -- Update every frame for smooth aimbot movement
+        wait(0.1)
     end
 end
 
--- Run the Aimbot when it's enabled
+-- ESP Functionality
+local function ESP()
+    while _G.ESPEnabled do
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("Head") then
+                local head = player.Character.Head
+                local pos, onScreen = Camera:WorldToViewportPoint(head.Position)
+                if onScreen then
+                    local boxSize = Vector2.new(100, 100)  -- Adjust box size based on your needs
+                    local boxPos = Vector2.new(pos.X - boxSize.X / 2, pos.Y - boxSize.Y / 2)
+                    -- Draw box around player
+                    local box = Instance.new("Frame")
+                    box.Size = UDim2.new(0, boxSize.X, 0, boxSize.Y)
+                    box.Position = UDim2.new(0, boxPos.X, 0, boxPos.Y)
+                    box.BackgroundColor3 = _G.ESPBoxColor
+                    box.BorderSizePixel = 2
+                    box.Parent = ScreenGui
+                    wait(0.1)
+                    box:Destroy()  -- Remove old boxes to avoid overlap
+                end
+            end
+        end
+        wait(0.1)
+    end
+end
+
+-- Start functionalities
 RunService.Heartbeat:Connect(function()
     if _G.AimbotEnabled then
         Aimbot()
     end
-end)
-
--- ESP Drawing - Highlight Humanoid
-local function HighlightHumanoid(player)
-    -- Ensure player has a character and humanoid
-    if player.Character and player.Character:FindFirstChild("Humanoid") then
-        local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            local box = Instance.new("Frame")
-            box.Size = UDim2.new(0, 50, 0, 50)
-            box.Position = UDim2.new(0, humanoidRootPart.Position.X, 0, humanoidRootPart.Position.Y)
-            box.BackgroundColor3 = _G.ESPBoxColor
-            box.BorderSizePixel = 0
-            box.Visible = _G.ESPEnabled
-            box.Parent = ScreenGui
-        end
+    if _G.ESPEnabled then
+        ESP()
     end
-end
-
--- Show ESP for each player
-Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function(character)
-        HighlightHumanoid(player)
-    end)
 end)
+
