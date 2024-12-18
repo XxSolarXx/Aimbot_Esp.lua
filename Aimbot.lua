@@ -14,7 +14,7 @@ local Settings = {
     ShowHealthBars = true,
     ShowDistance = true,
     ESPColor = Color3.fromRGB(0, 255, 0),
-    AimbotSmoothness = 0.1,  -- A value between 0 (instant) to 1 (very smooth)
+    AimbotSmoothness = 0.01,  -- A value between 0 (instant) to 1 (very smooth)
 }
 
 local ExcludedPlayers = {
