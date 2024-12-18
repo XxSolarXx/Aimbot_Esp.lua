@@ -215,38 +215,35 @@ ToggleAimbotButton.Parent = screenGui
 local ToggleFOVButton = Instance.new("TextButton")
 ToggleFOVButton.Size = UDim2.new(0, 200, 0, 50)
 ToggleFOVButton.Position = UDim2.new(0, 10, 0, 130)
-ToggleFOVButton.Text = "Toggle FOV Circle - On"
+ToggleFOVButton.Text = "Toggle FOV - On"
 ToggleFOVButton.Parent = screenGui
 
-local KillGuiButton = Instance.new("TextButton")
-KillGuiButton.Size = UDim2.new(0, 200, 0, 50)
-KillGuiButton.Position = UDim2.new(0, 10, 0, 190)
-KillGuiButton.Text = "Kill GUI"
-KillGuiButton.Parent = screenGui
+local KillGUIButton = Instance.new("TextButton")
+KillGUIButton.Size = UDim2.new(0, 200, 0, 50)
+KillGUIButton.Position = UDim2.new(0, 10, 0, 190)
+KillGUIButton.Text = "Kill GUI"
+KillGUIButton.Parent = screenGui
+
+KillGUIButton.MouseButton1Click:Connect(function()
+    screenGui.Enabled = false
+    Settings.ESPEnabled = false
+    Settings.AimbotEnabled = false
+    Settings.FOVCircleVisible = false
+end)
 
 ToggleESPButton.MouseButton1Click:Connect(function()
     Settings.ESPEnabled = not Settings.ESPEnabled
+    ToggleESPButton.Text = Settings.ESPEnabled and "Toggle ESP - On" or "Toggle ESP - Off"
     UpdateESP()
-    ToggleESPButton.Text = "Toggle ESP - " .. (Settings.ESPEnabled and "On" or "Off")
 end)
 
 ToggleAimbotButton.MouseButton1Click:Connect(function()
     Settings.AimbotEnabled = not Settings.AimbotEnabled
-    ToggleAimbotButton.Text = "Toggle Aimbot - " .. (Settings.AimbotEnabled and "On" or "Off")
+    ToggleAimbotButton.Text = Settings.AimbotEnabled and "Toggle Aimbot - On" or "Toggle Aimbot - Off"
 end)
 
 ToggleFOVButton.MouseButton1Click:Connect(function()
     Settings.FOVCircleVisible = not Settings.FOVCircleVisible
-    ToggleFOVButton.Text = "Toggle FOV Circle - " .. (Settings.FOVCircleVisible and "On" or "Off")
+    ToggleFOVButton.Text = Settings.FOVCircleVisible and "Toggle FOV - On" or "Toggle FOV - Off"
 end)
 
-KillGuiButton.MouseButton1Click:Connect(function()
-    Settings.ESPEnabled = false
-    Settings.AimbotEnabled = false
-    Settings.FOVCircleVisible = false
-    UpdateESP()
-    RemoveAimbotMessage()
-    FOVCircle.Visible = false
-end)
-
-UpdateESP()  -- Initialize ESP
