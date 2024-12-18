@@ -36,13 +36,14 @@ local MenuFrame = Instance.new("Frame", ScreenGui)
 MenuFrame.Size = UDim2.new(0, 200, 0, 100)
 MenuFrame.Position = UDim2.new(0, 10, 0, 10)
 MenuFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-MenuFrame.BackgroundTransparency = 0.5
+MenuFrame.BackgroundTransparency = 0.8  -- Set the transparency here
 
 local ShowFovButton = Instance.new("TextButton", MenuFrame)
 ShowFovButton.Size = UDim2.new(1, 0, 0.5, 0)
 ShowFovButton.Position = UDim2.new(0, 0, 0, 0)
 ShowFovButton.Text = "Show FOV Circle"
 ShowFovButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ShowFovButton.BackgroundTransparency = 0.8  -- Set the transparency here
 ShowFovButton.TextColor3 = Color3.fromRGB(0, 0, 0)
 ShowFovButton.MouseButton1Click:Connect(function()
     _G.CircleVisible = not _G.CircleVisible
@@ -53,6 +54,7 @@ ToggleAimbotButton.Size = UDim2.new(1, 0, 0.5, 0)
 ToggleAimbotButton.Position = UDim2.new(0, 0, 0.5, 0)
 ToggleAimbotButton.Text = "Toggle Aimbot"
 ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ToggleAimbotButton.BackgroundTransparency = 0.8  -- Set the transparency here
 ToggleAimbotButton.TextColor3 = Color3.fromRGB(0, 0, 0)
 ToggleAimbotButton.MouseButton1Click:Connect(function()
     _G.AimbotEnabled = not _G.AimbotEnabled
