@@ -9,7 +9,7 @@ local Settings = {
     ESPEnabled = false,
     AimbotEnabled = false,
     FOVRadius = 100,  -- Smaller FOV circle radius
-    FOVCircleVisible = true
+    FOVCircleVisible = true  -- Start with FOV Circle visible
 }
 
 -- ESP
@@ -66,7 +66,7 @@ local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 1  -- Thin white circle
 FOVCircle.Radius = Settings.FOVRadius
 FOVCircle.Color = Color3.fromRGB(255, 255, 255)  -- White color
-FOVCircle.Visible = Settings.FOVCircleVisible
+FOVCircle.Visible = Settings.FOVCircleVisible  -- Toggle visibility based on the setting
 FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)  -- Position at the mouse cursor
 FOVCircle.Filled = false  -- Set this to false to make the circle hollow
 
