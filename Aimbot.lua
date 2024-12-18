@@ -61,13 +61,14 @@ local function GetClosestPlayerToCursor()
     return closestPlayer
 end
 
--- FOV Circle (Original White Thin Circle)
+-- FOV Circle (Hollow White Ring)
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 1  -- Thin white circle
 FOVCircle.Radius = Settings.FOVRadius
 FOVCircle.Color = Color3.fromRGB(255, 255, 255)  -- White color
 FOVCircle.Visible = Settings.FOVCircleVisible
 FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
+FOVCircle.Filled = false  -- Set this to false to make the circle hollow
 
 RunService.RenderStepped:Connect(function()
     FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
