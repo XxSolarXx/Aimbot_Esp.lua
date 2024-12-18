@@ -106,13 +106,12 @@ local function GetClosestPlayerToCursor()
     local closestPlayer, shortestDistance = nil, Settings.FOVRadius
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            -- Check if the player is not in the exclusion list
-            if not table.find(ExcludedPlayers, player.Name) then
-                local screenPos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
-                if onScreen then
-                    local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
-                    -- Check if the player is within the FOV radius and is closer than the previous closest player
-                    if distance < shortestDistance then
+            local screenPos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+            if onScreen and not table.find(ExcludedPlayers, player.Name) then
+                local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
+                if distance < shortestDistance then
+                    local playerPos = Vector2.new(screenPos.X, screenPos.Y)
+                    if (playerPos - Vector2.new(Mouse.X, Mouse.Y)).Magnitude <= Settings.FOVRadius then
                         closestPlayer = player
                         shortestDistance = distance
                     end
@@ -215,5 +214,28 @@ ToggleAimbotButton.Parent = screenGui
 local ToggleFOVButton = Instance.new("TextButton")
 ToggleFOVButton.Size = UDim2.new(0, 200, 0, 50)
 ToggleFOVButton.Position = UDim2.new(0, 10, 0, 130)
-ToggleFOVButton.Text = "Toggle FOV - Off"
+ToggleFOVButton.Text = "Toggle FOV Circle - On"
 ToggleFOVButton.Parent = screenGui
+
+ToggleESPButton.MouseButton1Click:Connect(function()
+    Settings.ESPEnabled = not Settings.ESPEnabled
+    UpdateESP()
+    ToggleESPButton.Text = "Toggle ESP - " .. (Settings.ESPEnabled and "On" or "Off")
+end)
+
+ToggleAimbotButton.MouseButton1Click:Connect(function()
+    Settings.AimbotEnabled = not Settings.AimbotEnabled
+    if Settings.AimbotEnabled then
+        ShowAimbotMessage()
+    else
+        RemoveAimbotMessage()
+    end
+    ToggleAimbotButton.Text = "Toggle Aimbot - " .. (Settings.AimbotEnabled and "On" or "Off")
+end)
+
+ToggleFOVButton.MouseButton1Click:Connect(function()
+    Settings.FOVCircleVisible = not Settings.FOVCircleVisible
+    ToggleFOVButton.Text = "Toggle FOV Circle - " .. (Settings.FOVCircleVisible and "On" or "Off")
+end)
+
+UpdateESP()
