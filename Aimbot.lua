@@ -232,9 +232,26 @@ ToggleFOVButton.Position = UDim2.new(0, 10, 0, 130)
 ToggleFOVButton.Text = "Toggle FOV Circle - On"
 ToggleFOVButton.Parent = screenGui
 
+-- New "Kill Gui" Button
+local KillGuiButton = Instance.new("TextButton")
+KillGuiButton.Size = UDim2.new(0, 200, 0, 50)
+KillGuiButton.Position = UDim2.new(0, 10, 0, 190)
+KillGuiButton.Text = "Kill Gui"
+KillGuiButton.Parent = screenGui
+
+KillGuiButton.MouseButton1Click:Connect(function()
+    -- Disable all features
+    Settings.AimbotEnabled = false
+    Settings.ESPEnabled = false
+    Settings.FOVCircleVisible = false
+    ToggleESPButton.Text = "Toggle ESP - Off"
+    ToggleAimbotButton.Text = "Toggle Aimbot - Off"
+    ToggleFOVButton.Text = "Toggle FOV Circle - Off"
+    RemoveAimbotMessage()  -- Remove the aimbot lock-on message
+end)
+
 ToggleESPButton.MouseButton1Click:Connect(function()
     Settings.ESPEnabled = not Settings.ESPEnabled
-    UpdateESP()
     ToggleESPButton.Text = "Toggle ESP - " .. (Settings.ESPEnabled and "On" or "Off")
 end)
 
