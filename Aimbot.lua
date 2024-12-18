@@ -6,55 +6,21 @@ local LocalPlayer = Players.LocalPlayer
 local Holding = false
 
 _G.AimbotEnabled = true
-_G.TeamCheck = false -- If set to true then the script would only lock your aim at enemy team members.
-_G.AimPart = "Head" -- Where the aimbot script would lock at.
-_G.Sensitivity = 0 -- How many seconds it takes for the aimbot script to officially lock onto the target's aimpart.
+_G.TeamCheck = false
+_G.AimPart = "Head"
+_G.Sensitivity = 0
 
-_G.CircleSides = 64 -- How many sides the FOV circle would have (Not needed for circle)
-_G.CircleColor = Color3.fromRGB(255, 255, 255) -- (RGB) Color that the FOV circle would appear as.
-_G.CircleTransparency = 0.7 -- Transparency of the circle.
-_G.CircleRadius = 80 -- The radius of the circle / FOV.
-_G.CircleFilled = false -- Determines whether or not the circle is filled.
-_G.CircleVisible = true -- Determines whether or not the circle is visible.
-_G.CircleThickness = 0 -- The thickness of the circle.
+_G.CircleSides = 64
+_G.CircleColor = Color3.fromRGB(255, 255, 255)
+_G.CircleTransparency = 0.7
+_G.CircleRadius = 80
+_G.CircleFilled = false
+_G.CircleVisible = true
+_G.CircleThickness = 0
 
--- Create GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
-
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 200, 0, 150)
-MainFrame.Position = UDim2.new(0, 50, 0, 50)
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-MainFrame.BackgroundTransparency = 0.5
-MainFrame.Parent = ScreenGui
-
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, 0, 0, 30)
-TitleLabel.Text = "Aimbot & FOV"
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-TitleLabel.TextSize = 18
-TitleLabel.TextAlignment = Enum.TextAlignment.Center
-TitleLabel.Parent = MainFrame
-
-local ToggleFOVButton = Instance.new("TextButton")
-ToggleFOVButton.Size = UDim2.new(0, 180, 0, 30)
-ToggleFOVButton.Position = UDim2.new(0, 10, 0, 40)
-ToggleFOVButton.Text = "Show FOV Circle"
-ToggleFOVButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleFOVButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-ToggleFOVButton.TextSize = 14
-ToggleFOVButton.Parent = MainFrame
-
-local ToggleAimbotButton = Instance.new("TextButton")
-ToggleAimbotButton.Size = UDim2.new(0, 180, 0, 30)
-ToggleAimbotButton.Position = UDim2.new(0, 10, 0, 80)
-ToggleAimbotButton.Text = "Toggle Aimbot"
-ToggleAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-ToggleAimbotButton.TextSize = 14
-ToggleAimbotButton.Parent = MainFrame
+_G.ESPEnabled = true
+_G.ESPBoxColor = Color3.fromRGB(255, 0, 0)
+_G.ESPBoxThickness = 2
 
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
@@ -63,54 +29,90 @@ FOVCircle.Filled = _G.CircleFilled
 FOVCircle.Color = _G.CircleColor
 FOVCircle.Visible = _G.CircleVisible
 FOVCircle.Transparency = _G.CircleTransparency
+FOVCircle.NumSides = _G.CircleSides
 FOVCircle.Thickness = _G.CircleThickness
 
--- Toggle FOV Circle
-ToggleFOVButton.MouseButton1Click:Connect(function()
+-- Create GUI elements
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
+local MenuFrame = Instance.new("Frame", ScreenGui)
+MenuFrame.Size = UDim2.new(0, 200, 0, 100)
+MenuFrame.Position = UDim2.new(0, 10, 0, 10)
+MenuFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+MenuFrame.BackgroundTransparency = 0.5
+
+local ShowFovButton = Instance.new("TextButton", MenuFrame)
+ShowFovButton.Size = UDim2.new(1, 0, 0.5, 0)
+ShowFovButton.Position = UDim2.new(0, 0, 0, 0)
+ShowFovButton.Text = "Show FOV Circle"
+ShowFovButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ShowFovButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ShowFovButton.MouseButton1Click:Connect(function()
     _G.CircleVisible = not _G.CircleVisible
-    FOVCircle.Visible = _G.CircleVisible
 end)
 
--- Toggle Aimbot
+local ToggleAimbotButton = Instance.new("TextButton", MenuFrame)
+ToggleAimbotButton.Size = UDim2.new(1, 0, 0.5, 0)
+ToggleAimbotButton.Position = UDim2.new(0, 0, 0.5, 0)
+ToggleAimbotButton.Text = "Toggle Aimbot"
+ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ToggleAimbotButton.TextColor3 = Color3.fromRGB(0, 0, 0)
 ToggleAimbotButton.MouseButton1Click:Connect(function()
     _G.AimbotEnabled = not _G.AimbotEnabled
-    if _G.AimbotEnabled then
-        ToggleAimbotButton.Text = "Aimbot Enabled"
-    else
-        ToggleAimbotButton.Text = "Aimbot Disabled"
-    end
 end)
 
--- Make GUI movable
-local dragToggle = false
-local dragStart = nil
-local dragPos = nil
+-- ESP Drawing Function
+local function DrawESPBox(player)
+    -- Ensure player has a character and humanoid
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        local humanoid = player.Character.Humanoid
+        local head = player.Character:FindFirstChild("Head")
 
-local function updateDrag(input)
-    local delta = input.Position - dragStart
-    MainFrame.Position = UDim2.new(dragPos.X.Scale, delta.X, dragPos.Y.Scale, delta.Y)
+        -- Ensure the humanoid and head exist before drawing
+        if humanoid and head then
+            -- Get the screen position of the head
+            local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
+
+            -- If the head is on the screen, draw the box
+            if onScreen then
+                -- Get the bounding box dimensions from the head size (this is roughly the size of the player)
+                local size = head.Size
+                local topLeft = Camera:WorldToViewportPoint(head.Position + Vector3.new(-size.X / 2, size.Y / 2, 0))  -- Top-left corner
+                local bottomRight = Camera:WorldToViewportPoint(head.Position + Vector3.new(size.X / 2, -size.Y / 2, 0))  -- Bottom-right corner
+
+                -- Draw the ESP Box (box will form a rectangle around the head)
+                local box = Drawing.new("Line")
+                box.From = Vector2.new(topLeft.X, topLeft.Y)
+                box.To = Vector2.new(topLeft.X, bottomRight.Y)
+                box.Color = _G.ESPBoxColor
+                box.Thickness = _G.ESPBoxThickness
+                box.Visible = _G.ESPEnabled
+
+                local box2 = Drawing.new("Line")
+                box2.From = Vector2.new(topLeft.X, bottomRight.Y)
+                box2.To = Vector2.new(bottomRight.X, bottomRight.Y)
+                box2.Color = _G.ESPBoxColor
+                box2.Thickness = _G.ESPBoxThickness
+                box2.Visible = _G.ESPEnabled
+
+                local box3 = Drawing.new("Line")
+                box3.From = Vector2.new(bottomRight.X, bottomRight.Y)
+                box3.To = Vector2.new(bottomRight.X, topLeft.Y)
+                box3.Color = _G.ESPBoxColor
+                box3.Thickness = _G.ESPBoxThickness
+                box3.Visible = _G.ESPEnabled
+
+                local box4 = Drawing.new("Line")
+                box4.From = Vector2.new(bottomRight.X, topLeft.Y)
+                box4.To = Vector2.new(topLeft.X, topLeft.Y)
+                box4.Color = _G.ESPBoxColor
+                box4.Thickness = _G.ESPBoxThickness
+                box4.Visible = _G.ESPEnabled
+            end
+        end
+    end
 end
 
-TitleLabel.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragToggle = true
-        dragStart = input.Position
-        dragPos = MainFrame.Position
-    end
-end)
-
-TitleLabel.InputChanged:Connect(function(input)
-    if dragToggle and input.UserInputType == Enum.UserInputType.MouseMovement then
-        updateDrag(input)
-    end
-end)
-
-TitleLabel.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragToggle = false
-    end
-end)
-
+-- Aimbot and FOV circle logic
 local function GetClosestPlayer()
     local MaximumDistance = _G.CircleRadius
     local Target = nil
@@ -170,10 +172,32 @@ RunService.RenderStepped:Connect(function()
     FOVCircle.Filled = _G.CircleFilled
     FOVCircle.Color = _G.CircleColor
     FOVCircle.Visible = _G.CircleVisible
+    FOVCircle.Radius = _G.CircleRadius
     FOVCircle.Transparency = _G.CircleTransparency
+    FOVCircle.NumSides = _G.CircleSides
     FOVCircle.Thickness = _G.CircleThickness
 
+    -- ESP update
+    if _G.ESPEnabled then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                DrawESPBox(player)
+            end
+        end
+    end
+
     if Holding == true and _G.AimbotEnabled == true then
-        TweenService:Create(Camera, TweenInfo.new(_G.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = CFrame.new(Camera.CFrame.Position, GetClosestPlayer().Character[_G.AimPart].Position)}):Play()
+        -- Aimbot locks to the closest player’s head within the FOV circle
+        local target = nil
+        if _G.CircleVisible then
+            target = GetClosestPlayer()
+        end
+        
+        if target then
+            local aimPart = target.Character[_G.AimPart]
+            if aimPart then
+                TweenService:Create(Camera, TweenInfo.new(_G.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = CFrame.new(Camera.CFrame.Position, aimPart.Position)}):Play()
+            end
+        end
     end
 end)
