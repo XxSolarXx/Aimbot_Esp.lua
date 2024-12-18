@@ -119,80 +119,47 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- ESP Drawing
-local function DrawESPBox(player)
+-- ESP Drawing - Highlight Humanoid
+local function HighlightHumanoid(player)
     -- Ensure player has a character and humanoid
     if player.Character and player.Character:FindFirstChild("Humanoid") then
         local humanoid = player.Character.Humanoid
-        local head = player.Character:FindFirstChild("Head")
 
-        -- Ensure the humanoid and head exist before drawing
-        if humanoid and head then
-            local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
-
-            if onScreen then
-                local size = head.Size
-                local topLeft = Camera:WorldToViewportPoint(head.Position + Vector3.new(-size.X / 2, size.Y / 2, 0))
-                local bottomRight = Camera:WorldToViewportPoint(head.Position + Vector3.new(size.X / 2, -size.Y / 2, 0))
-
-                -- Draw the ESP Box
-                local box = Drawing.new("Line")
-                box.From = Vector2.new(topLeft.X, topLeft.Y)
-                box.To = Vector2.new(topLeft.X, bottomRight.Y)
-                box.Color = _G.ESPBoxColor
-                box.Thickness = _G.ESPBoxThickness
-                box.Visible = _G.ESPEnabled
-
-                local box2 = Drawing.new("Line")
-                box2.From = Vector2.new(topLeft.X, bottomRight.Y)
-                box2.To = Vector2.new(bottomRight.X, bottomRight.Y)
-                box2.Color = _G.ESPBoxColor
-                box2.Thickness = _G.ESPBoxThickness
-                box2.Visible = _G.ESPEnabled
-
-                local box3 = Drawing.new("Line")
-                box3.From = Vector2.new(bottomRight.X, bottomRight.Y)
-                box3.To = Vector2.new(bottomRight.X, topLeft.Y)
-                box3.Color = _G.ESPBoxColor
-                box3.Thickness = _G.ESPBoxThickness
-                box3.Visible = _G.ESPEnabled
-
-                local box4 = Drawing.new("Line")
-                box4.From = Vector2.new(bottomRight.X, topLeft.Y)
-                box4.To = Vector2.new(topLeft.X, topLeft.Y)
-                box4.Color = _G.ESPBoxColor
-                box4.Thickness = _G.ESPBoxThickness
-                box4.Visible = _G.ESPEnabled
+        -- Ensure the humanoid exists before applying highlight
+        if humanoid then
+            -- Check if the humanoid already has a highlight
+            local existingHighlight = player.Character:FindFirstChild("HumanoidHighlight")
+            if not existingHighlight then
+                -- Create a new highlight if it doesn't exist
+                local highlight = Instance.new("Highlight")
+                highlight.Name = "HumanoidHighlight"
+                highlight.Parent = player.Character
+                highlight.FillColor = _G.ESPBoxColor -- You can customize the highlight color
+                highlight.FillTransparency = 0.5 -- Set transparency for the highlight
+                highlight.OutlineColor = Color3.fromRGB(255, 0, 0) -- Set the outline color for emphasis
+                highlight.OutlineTransparency = 0.8 -- Set outline transparency
             end
         end
     end
 end
 
--- Draw FOV Circle
-local FovCircle
+-- Update ESP every frame
 RunService.RenderStepped:Connect(function()
-    if _G.CircleVisible then
-        local circleCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-        local circleRadius = _G.AimbotFOV
-        if not FovCircle then
-            FovCircle = Drawing.new("Circle")
-            FovCircle.Color = Color3.fromRGB(0, 255, 0)  -- Green for visibility
-            FovCircle.Thickness = 2
-            FovCircle.Filled = false
-        end
-        FovCircle.Position = circleCenter
-        FovCircle.Radius = circleRadius
-        FovCircle.Visible = true
-    else
-        if FovCircle then
-            FovCircle.Visible = false
-        end
-    end
-
     if _G.ESPEnabled then
+        -- Apply highlight to all players
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= LocalPlayer then
-                DrawESPBox(player)
+                HighlightHumanoid(player)
+            end
+        end
+    else
+        -- Remove highlight if ESP is disabled
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                local existingHighlight = player.Character:FindFirstChild("HumanoidHighlight")
+                if existingHighlight then
+                    existingHighlight:Destroy()
+                end
             end
         end
     end
