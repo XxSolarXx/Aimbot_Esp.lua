@@ -94,6 +94,21 @@ local function IsPlayerVisible(player)
     return false  -- Player is not visible
 end
 
+-- Aimbot when right mouse button is pressed
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then  -- Right Mouse Button
+        Settings.AimbotEnabled = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then  -- Right Mouse Button
+        Settings.AimbotEnabled = false
+    end
+end)
+
 RunService.RenderStepped:Connect(function()
     if Settings.AimbotEnabled then
         local target = GetClosestPlayerToCursor()
