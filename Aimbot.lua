@@ -49,11 +49,16 @@ local function GetClosestPlayerToCursor()
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+            -- Check if the player is on screen and not occluded by walls
             if onScreen then
                 local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
                 if distance < shortestDistance then
-                    closestPlayer = player
-                    shortestDistance = distance
+                    -- Check if the player is within the FOV circle
+                    local playerPos = Vector2.new(screenPos.X, screenPos.Y)
+                    if (playerPos - Vector2.new(Mouse.X, Mouse.Y)).Magnitude <= Settings.FOVRadius then
+                        closestPlayer = player
+                        shortestDistance = distance
+                    end
                 end
             end
         end
