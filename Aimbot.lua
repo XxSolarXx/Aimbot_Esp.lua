@@ -2,59 +2,22 @@ local Camera = workspace.CurrentCamera
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local Holding = false
 
-_G.AimbotEnabled = true
-_G.TeamCheck = false -- If set to true then the script would only lock your aim at enemy team members.
-_G.AimPart = "Head" -- Where the aimbot script would lock at.
-_G.Sensitivity = 0 -- How many seconds it takes for the aimbot script to officially lock onto the target's aimpart.
+_G.AimbotEnabled = false -- Start with aimbot disabled
+_G.TeamCheck = false
+_G.AimPart = "Head"
+_G.Sensitivity = 0
 
-_G.CircleSides = 64 -- How many sides the FOV circle would have (Not needed for circle)
-_G.CircleColor = Color3.fromRGB(255, 255, 255) -- (RGB) Color that the FOV circle would appear as.
-_G.CircleTransparency = 0.7 -- Transparency of the circle.
-_G.CircleRadius = 80 -- The radius of the circle / FOV.
-_G.CircleFilled = false -- Determines whether or not the circle is filled.
-_G.CircleVisible = true -- Determines whether or not the circle is visible.
-_G.CircleThickness = 0 -- The thickness of the circle.
-
--- Create GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
-
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 200, 0, 150)
-MainFrame.Position = UDim2.new(0, 50, 0, 50)
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-MainFrame.BackgroundTransparency = 0.5
-MainFrame.Parent = ScreenGui
-
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, 0, 0, 30)
-TitleLabel.Text = "Aimbot & FOV"
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-TitleLabel.TextSize = 18
-TitleLabel.TextAlignment = Enum.TextAlignment.Center
-TitleLabel.Parent = MainFrame
-
-local ToggleFOVButton = Instance.new("TextButton")
-ToggleFOVButton.Size = UDim2.new(0, 180, 0, 30)
-ToggleFOVButton.Position = UDim2.new(0, 10, 0, 40)
-ToggleFOVButton.Text = "Show FOV Circle"
-ToggleFOVButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleFOVButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-ToggleFOVButton.TextSize = 14
-ToggleFOVButton.Parent = MainFrame
-
-local ToggleAimbotButton = Instance.new("TextButton")
-ToggleAimbotButton.Size = UDim2.new(0, 180, 0, 30)
-ToggleAimbotButton.Position = UDim2.new(0, 10, 0, 80)
-ToggleAimbotButton.Text = "Toggle Aimbot"
-ToggleAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-ToggleAimbotButton.TextSize = 14
-ToggleAimbotButton.Parent = MainFrame
+_G.CircleSides = 64
+_G.CircleColor = Color3.fromRGB(255, 255, 255)
+_G.CircleTransparency = 0.7
+_G.CircleRadius = 80
+_G.CircleFilled = false
+_G.CircleVisible = false -- Start with FOV circle hidden
+_G.CircleThickness = 0
 
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
@@ -62,55 +25,74 @@ FOVCircle.Radius = _G.CircleRadius
 FOVCircle.Filled = _G.CircleFilled
 FOVCircle.Color = _G.CircleColor
 FOVCircle.Visible = _G.CircleVisible
+FOVCircle.Radius = _G.CircleRadius
 FOVCircle.Transparency = _G.CircleTransparency
+FOVCircle.NumSides = _G.CircleSides
 FOVCircle.Thickness = _G.CircleThickness
 
--- Toggle FOV Circle
-ToggleFOVButton.MouseButton1Click:Connect(function()
-    _G.CircleVisible = not _G.CircleVisible
+-- Create GUI elements
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
+local MenuFrame = Instance.new("Frame", ScreenGui)
+MenuFrame.Size = UDim2.new(0, 250, 0, 150)
+MenuFrame.Position = UDim2.new(0, 10, 0, 10)
+MenuFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MenuFrame.BackgroundTransparency = 0.6
+MenuFrame.BorderSizePixel = 0
+MenuFrame.Draggable = true
+MenuFrame.Active = true
+MenuFrame.Selectable = true
+
+-- Create Title for the Menu
+local Title = Instance.new("TextLabel", MenuFrame)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Position = UDim2.new(0, 0, 0, 0)
+Title.Text = "Aimbot & FOV Settings"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Title.BackgroundTransparency = 0.5
+Title.TextSize = 18
+Title.TextAlign = Enum.TextAlign.Center
+
+-- Create Show FOV Circle button
+local ShowFovButton = Instance.new("TextButton", MenuFrame)
+ShowFovButton.Size = UDim2.new(1, 0, 0.5, 0)
+ShowFovButton.Position = UDim2.new(0, 0, 0.25, 0)
+ShowFovButton.Text = "Show FOV Circle"
+ShowFovButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+ShowFovButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ShowFovButton.TextSize = 14
+ShowFovButton.TextButtonMode = Enum.ButtonMode.Toggle
+ShowFovButton.MouseButton1Click:Connect(function()
+    _G.CircleVisible = not _G.CircleVisible -- Toggle visibility of the FOV circle
     FOVCircle.Visible = _G.CircleVisible
 end)
+ShowFovButton.MouseEnter:Connect(function()
+    ShowFovButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+end)
+ShowFovButton.MouseLeave:Connect(function()
+    ShowFovButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+end)
 
--- Toggle Aimbot
+-- Create Toggle Aimbot button
+local ToggleAimbotButton = Instance.new("TextButton", MenuFrame)
+ToggleAimbotButton.Size = UDim2.new(1, 0, 0.5, 0)
+ToggleAimbotButton.Position = UDim2.new(0, 0, 0.75, 0)
+ToggleAimbotButton.Text = "Toggle Aimbot"
+ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+ToggleAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleAimbotButton.TextSize = 14
+ToggleAimbotButton.TextButtonMode = Enum.ButtonMode.Toggle
 ToggleAimbotButton.MouseButton1Click:Connect(function()
-    _G.AimbotEnabled = not _G.AimbotEnabled
-    if _G.AimbotEnabled then
-        ToggleAimbotButton.Text = "Aimbot Enabled"
-    else
-        ToggleAimbotButton.Text = "Aimbot Disabled"
-    end
+    _G.AimbotEnabled = not _G.AimbotEnabled -- Toggle the aimbot functionality
+end)
+ToggleAimbotButton.MouseEnter:Connect(function()
+    ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+end)
+ToggleAimbotButton.MouseLeave:Connect(function()
+    ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
 end)
 
--- Make GUI movable
-local dragToggle = false
-local dragStart = nil
-local dragPos = nil
-
-local function updateDrag(input)
-    local delta = input.Position - dragStart
-    MainFrame.Position = UDim2.new(dragPos.X.Scale, delta.X, dragPos.Y.Scale, delta.Y)
-end
-
-TitleLabel.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragToggle = true
-        dragStart = input.Position
-        dragPos = MainFrame.Position
-    end
-end)
-
-TitleLabel.InputChanged:Connect(function(input)
-    if dragToggle and input.UserInputType == Enum.UserInputType.MouseMovement then
-        updateDrag(input)
-    end
-end)
-
-TitleLabel.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragToggle = false
-    end
-end)
-
+-- Aimbot and FOV circle logic
 local function GetClosestPlayer()
     local MaximumDistance = _G.CircleRadius
     local Target = nil
@@ -170,10 +152,15 @@ RunService.RenderStepped:Connect(function()
     FOVCircle.Filled = _G.CircleFilled
     FOVCircle.Color = _G.CircleColor
     FOVCircle.Visible = _G.CircleVisible
+    FOVCircle.Radius = _G.CircleRadius
     FOVCircle.Transparency = _G.CircleTransparency
+    FOVCircle.NumSides = _G.CircleSides
     FOVCircle.Thickness = _G.CircleThickness
 
     if Holding == true and _G.AimbotEnabled == true then
-        TweenService:Create(Camera, TweenInfo.new(_G.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = CFrame.new(Camera.CFrame.Position, GetClosestPlayer().Character[_G.AimPart].Position)}):Play()
+        local target = GetClosestPlayer()
+        if target and target.Character and target.Character:FindFirstChild(_G.AimPart) then
+            TweenService:Create(Camera, TweenInfo.new(_G.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = CFrame.new(Camera.CFrame.Position, target.Character[_G.AimPart].Position)}):Play()
+        end
     end
 end)
