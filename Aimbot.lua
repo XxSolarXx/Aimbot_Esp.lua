@@ -131,11 +131,21 @@ ToggleFOVButton.TextColor3 = Color3.fromRGB(0, 0, 0)
 ToggleFOVButton.Font = Enum.Font.SourceSans
 ToggleFOVButton.TextSize = 16
 
--- FOV Slider
+-- FOV Circle Size Button & Slider
+local ShowSliderButton = Instance.new("TextButton", MenuFrame)
+ShowSliderButton.Size = UDim2.new(1, 0, 0.2, 0)
+ShowSliderButton.Position = UDim2.new(0, 0, 1, -40)
+ShowSliderButton.Text = "FOV Circle Size"
+ShowSliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ShowSliderButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ShowSliderButton.Font = Enum.Font.SourceSans
+ShowSliderButton.TextSize = 16
+
 local FOVSlider = Instance.new("Frame", MenuFrame)
 FOVSlider.Size = UDim2.new(1, -20, 0.2, -10)
 FOVSlider.Position = UDim2.new(0, 10, 0, 230)
 FOVSlider.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+FOVSlider.Visible = false  -- Initially hidden
 
 local FOVSliderBar = Instance.new("Frame", FOVSlider)
 FOVSliderBar.Size = UDim2.new(1, 0, 0.5, 0)
@@ -180,6 +190,10 @@ end)
 ToggleFOVButton.MouseButton1Click:Connect(function()
     Settings.FOVCircleVisible = not Settings.FOVCircleVisible
     ToggleFOVButton.Text = Settings.FOVCircleVisible and "FOV: ON" or "FOV: OFF"
+end)
+
+ShowSliderButton.MouseButton1Click:Connect(function()
+    FOVSlider.Visible = not FOVSlider.Visible  -- Toggle visibility of the slider
 end)
 
 -- Aimbot Right-Click Activation
