@@ -197,32 +197,34 @@ local function DrawESP()
                 local head = player.Character:FindFirstChild("Head")
                 if head then
                     local box = Drawing.new("Square")
-                    box.Size = Vector2.new(50, 50)  -- Just a placeholder size
-                    box.Position = Vector2.new(100, 100)  -- Placeholder for actual positioning logic
+                    box.Size = Vector2.new(50, 50)  -- Just a placeholder for the box
+                    box.Position = Vector2.new(Camera.WorldToViewportPoint(head.Position).X, Camera.WorldToViewportPoint(head.Position).Y)
                     box.Color = _G.ESPBoxColor
-                    box.Thickness = 2
+                    box.Visible = true
                 end
             end
         end
-        wait(0.1)
+        wait(1)  -- small delay between checks
     end
 end
 
--- Toggle ESP
-RunService.Heartbeat:Connect(function()
-    if _G.ESPEnabled then
-        DrawESP()
-    end
-end)
-
--- Display FOV Circle
-RunService.Heartbeat:Connect(function()
-    if _G.CircleVisible then
+-- Handle showing the FOV circle
+local function ShowFOVCircle()
+    while _G.CircleVisible do
         local fovCircle = Drawing.new("Circle")
         fovCircle.Radius = _G.FOVSize
-        fovCircle.Position = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+        fovCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
         fovCircle.Color = _G.FOVColor
-        fovCircle.Thickness = 2
         fovCircle.Visible = true
+        wait(1)
     end
-end)
+end
+
+-- Start ESP and FOV circles
+if _G.ESPEnabled then
+    DrawESP()
+end
+
+if _G.CircleVisible then
+    ShowFOVCircle()
+end
