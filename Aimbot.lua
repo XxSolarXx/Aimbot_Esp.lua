@@ -1,3 +1,5 @@
+print("This was made by ytz_solar on discord add him!")
+print("join the discord: discord.gg/getpluto")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -202,25 +204,25 @@ screenGui.Enabled = true
 
 local ToggleESPButton = Instance.new("TextButton")
 ToggleESPButton.Size = UDim2.new(0, 200, 0, 50)
-ToggleESPButton.Position = UDim2.new(0, 10, 0, 10)
+ToggleESPButton.Position = UDim2.new(1, -200, 0, 10)
 ToggleESPButton.Text = "Toggle ESP - Off"
 ToggleESPButton.Parent = screenGui
 
 local ToggleAimbotButton = Instance.new("TextButton")
 ToggleAimbotButton.Size = UDim2.new(0, 200, 0, 50)
-ToggleAimbotButton.Position = UDim2.new(0, 10, 0, 70)
+ToggleAimbotButton.Position = UDim2.new(1, -200, 0, 70)
 ToggleAimbotButton.Text = "Toggle Aimbot - Off"
 ToggleAimbotButton.Parent = screenGui
 
 local ToggleFOVButton = Instance.new("TextButton")
 ToggleFOVButton.Size = UDim2.new(0, 200, 0, 50)
-ToggleFOVButton.Position = UDim2.new(0, 10, 0, 130)
+ToggleFOVButton.Position = UDim2.new(1, -200, 0, 130)
 ToggleFOVButton.Text = "Toggle FOV - On"
 ToggleFOVButton.Parent = screenGui
 
 local KillGUIButton = Instance.new("TextButton")
 KillGUIButton.Size = UDim2.new(0, 200, 0, 50)
-KillGUIButton.Position = UDim2.new(0, 10, 0, 190)
+KillGUIButton.Position = UDim2.new(1, -200, 0, 190)
 KillGUIButton.Text = "Kill GUI"
 KillGUIButton.Parent = screenGui
 
