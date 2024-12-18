@@ -37,9 +37,9 @@ MenuFrame.Size = UDim2.new(0, 200, 0, 150)
 MenuFrame.Position = UDim2.new(0, 10, 0, 10)
 MenuFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 MenuFrame.BackgroundTransparency = 0.5
-MenuFrame.Draggable = true -- Make the GUI draggable
-MenuFrame.Active = true -- Allow interaction with the GUI
+MenuFrame.Draggable = true  -- Make the frame draggable
 
+-- ShowFovButton
 local ShowFovButton = Instance.new("TextButton", MenuFrame)
 ShowFovButton.Size = UDim2.new(1, 0, 0.5, 0)
 ShowFovButton.Position = UDim2.new(0, 0, 0, 0)
@@ -50,7 +50,9 @@ ShowFovButton.MouseButton1Click:Connect(function()
     _G.CircleVisible = not _G.CircleVisible -- Toggle visibility of the FOV circle
     FOVCircle.Visible = _G.CircleVisible
 end)
+ShowFovButton.TextButton.Visible = true
 
+-- ToggleAimbotButton
 local ToggleAimbotButton = Instance.new("TextButton", MenuFrame)
 ToggleAimbotButton.Size = UDim2.new(1, 0, 0.5, 0)
 ToggleAimbotButton.Position = UDim2.new(0, 0, 0.5, 0)
@@ -60,6 +62,10 @@ ToggleAimbotButton.TextColor3 = Color3.fromRGB(0, 0, 0)
 ToggleAimbotButton.MouseButton1Click:Connect(function()
     _G.AimbotEnabled = not _G.AimbotEnabled -- Toggle the aimbot functionality
 end)
+
+-- Ensure the buttons are showing
+ShowFovButton.Visible = true
+ToggleAimbotButton.Visible = true
 
 -- Aimbot and FOV circle logic
 local function GetClosestPlayer()
