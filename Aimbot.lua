@@ -14,11 +14,11 @@ local Settings = {
     ShowHealthBars = true,
     ShowDistance = true,
     ESPColor = Color3.fromRGB(0, 255, 0),
-    AimbotSmoothness = 0.01,  -- Stronger smoothness
+    AimbotSmoothness = 0.1,  -- Stronger smoothness
 }
 
 local ExcludedPlayers = {
-    "Player1", -- Replace with the player names you want to exclude from the aimbot
+    "PlutoExecutor94_UNC", -- Replace with the player names you want to exclude from the aimbot
     "Player2", -- Add more player names here as needed
 }
 
